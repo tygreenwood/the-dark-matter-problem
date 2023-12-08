@@ -1,6 +1,6 @@
 use bevy::prelude::{App, Component, Plugin, Startup, Update};
 
-use self::systems::{camera_follow_player, setup_camera};
+use systems::{camera_follow_player, setup_camera};
 
 pub mod components;
 pub mod systems;

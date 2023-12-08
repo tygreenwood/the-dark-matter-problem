@@ -1,11 +1,25 @@
-use bevy::prelude::{Camera2dBundle, Commands, GlobalTransform, Query, Transform, With};
+use bevy::prelude::{
+    default, Camera2dBundle, Commands, GlobalTransform, OrthographicProjection, Query, Res,
+    Transform, With,
+};
 
-use crate::player::components::Player;
+use crate::{player::components::Player, setup::resources::DisplayScale};
 
 use super::components::Camera;
 
-pub fn setup_camera(mut commands: Commands) {
-    commands.spawn((Camera2dBundle::default(), Camera));
+pub fn setup_camera(mut commands: Commands, scale: Res<DisplayScale>) {
+    commands.spawn((
+        Camera2dBundle {
+            projection: OrthographicProjection {
+                scale: scale.0,
+                near: -1000.,
+                far: 1000.,
+                ..default()
+            },
+            ..default()
+        },
+        Camera,
+    ));
 }
 
 pub fn camera_follow_player(

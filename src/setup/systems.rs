@@ -1,23 +1,8 @@
-use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
+use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::setup::WINDOW_HEIGHT;
-
-use super::resources::{DisplayResolution, DisplayScale};
-
-pub fn setup_graphics(
-    mut resolution: ResMut<DisplayResolution>,
-    mut scale: ResMut<DisplayScale>,
-    winit_windows: NonSend<WinitWindows>,
-    window_query: Query<Entity, With<PrimaryWindow>>,
-) {
-    if let Some(monitor) = window_query
-        .get_single()
-        .ok()
-        .and_then(|entity| winit_windows.get_window(entity))
-        .and_then(|winit_window| winit_window.current_monitor())
+pub fn setup_graphics(window_query: Query<&Window, With<PrimaryWindow>>) {
     {
-        resolution.x = monitor.size().width as f32;
-        resolution.y = monitor.size().height as f32;
-        scale.0 = resolution.y / WINDOW_HEIGHT;
+        let win = window_query.single();
+        println!("{}", win.resolution.scale_factor());
     }
 }

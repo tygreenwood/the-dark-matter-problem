@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::{Collider, RigidBody};
 
-use crate::setup::{resources::DisplayScale, WINDOW_BOTTOM_Y, WINDOW_WIDTH};
+use crate::setup::{WINDOW_BOTTOM_Y, WINDOW_WIDTH};
 
 use super::{components::PlatformBundle, COLOR_FLOOR, FLOOR_THICKNESS};
 
-pub fn setup_entities(mut commands: Commands, scale: Res<DisplayScale>) {
+pub fn setup_entities(mut commands: Commands) {
     commands.spawn(PlatformBundle::new(
         Vec2::new(-100.0, 0.),
         Vec2::new(75.0, 200.0),
@@ -26,12 +26,8 @@ pub fn setup_entities(mut commands: Commands, scale: Res<DisplayScale>) {
                 ..default()
             },
             transform: Transform {
-                translation: Vec3::new(
-                    0.0,
-                    (WINDOW_BOTTOM_Y * scale.0) + (FLOOR_THICKNESS * scale.0) / 2.0,
-                    0.0,
-                ),
-                scale: Vec3::new(WINDOW_WIDTH * scale.0, FLOOR_THICKNESS * scale.0, 1.0),
+                translation: Vec3::new(0.0, WINDOW_BOTTOM_Y + FLOOR_THICKNESS / 2.0, 0.0),
+                scale: Vec3::new(WINDOW_WIDTH, FLOOR_THICKNESS, 1.0),
                 ..default()
             },
             ..default()
