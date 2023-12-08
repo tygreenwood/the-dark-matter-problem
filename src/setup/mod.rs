@@ -1,6 +1,6 @@
 use bevy::{prelude::*, window::close_on_esc};
 
-use resources::{DisplayResolution, DisplayScale};
+use resources::DisplayScale;
 use systems::setup_graphics;
 
 pub mod resources;
@@ -16,8 +16,7 @@ pub struct SetupPlugin;
 
 impl Plugin for SetupPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<DisplayResolution>()
-            .init_resource::<DisplayScale>()
+        app.init_resource::<DisplayScale>()
             .add_systems(PreStartup, setup_graphics)
             .add_systems(Update, close_on_esc);
     }

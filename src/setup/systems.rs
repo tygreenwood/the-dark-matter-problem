@@ -1,8 +1,13 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-pub fn setup_graphics(window_query: Query<&Window, With<PrimaryWindow>>) {
-    {
-        let win = window_query.single();
-        println!("{}", win.resolution.scale_factor());
-    }
+use crate::setup::WINDOW_HEIGHT;
+
+use super::resources::DisplayScale;
+
+pub fn setup_graphics(
+    mut scale: ResMut<DisplayScale>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = window_query.single();
+    scale.0 = WINDOW_HEIGHT / window.resolution.height() as f32;
 }

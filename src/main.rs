@@ -1,9 +1,11 @@
+use background::BackgroundPlugin;
 use bevy::{
     prelude::*,
     window::{WindowMode, WindowResolution},
 };
 use bevy_rapier2d::{prelude::*, render::RapierDebugRenderPlugin};
 
+mod background;
 mod camera;
 mod platforms;
 mod player;
@@ -24,7 +26,7 @@ fn main() {
                 title: "The Dark Matter Problem".to_string(),
                 resizable: true,
                 resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HEIGHT),
-                mode: WindowMode::Fullscreen,
+                mode: WindowMode::BorderlessFullscreen,
                 ..default()
             }),
             ..default()
@@ -33,6 +35,12 @@ fn main() {
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(200.),
             RapierDebugRenderPlugin::default(),
         ))
-        .add_plugins((SetupPlugin, PlayerPlugin, CameraPlugin, PlatformsPlugin))
+        .add_plugins((
+            SetupPlugin,
+            PlayerPlugin,
+            CameraPlugin,
+            PlatformsPlugin,
+            BackgroundPlugin,
+        ))
         .run();
 }
