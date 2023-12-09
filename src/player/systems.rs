@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use super::components::{Jump, Player};
+use super::components::{AnimationIndices, AnimationTimer, Jump, Player};
 use crate::setup::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X};
 
 const PLAYER_VELOCITY_X: f32 = 400.0;
@@ -10,48 +10,63 @@ const PLAYER_VELOCITY_Y: f32 = 850.0;
 
 const MAX_JUMP_HEIGHT: f32 = 230.0;
 
-pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_player(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
+    let texture_handle = asset_server.load("SpaceGuyMk5RunningAnimation1.png");
+    let texture_atlas =
+        TextureAtlas::from_grid(texture_handle, Vec2::new(19.0, 32.0), 7, 1, None, None);
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let animation_indices = AnimationIndices { first: 0, last: 6 };
     commands.spawn((
-        SpriteBundle {
-            texture: asset_server.load("astronaut.png"),
+        SpriteSheetBundle {
+            sprite: TextureAtlasSprite {
+                flip_x: false,
+                ..default()
+            },
+            texture_atlas: texture_atlas_handle,
             transform: Transform {
                 translation: Vec3::new(WINDOW_LEFT_X + 100.0, WINDOW_BOTTOM_Y + 300.0, 0.0),
-                // scale: Vec3::new(0.2, 0.2, 1.0),
+                scale: Vec3::new(5., 5., 1.),
                 ..default()
             },
             ..default()
         },
         Player,
         RigidBody::KinematicPositionBased,
-        Collider::cuboid(72.0, 132.0),
+        Collider::cuboid(9.5, 16.0),
         KinematicCharacterController::default(),
+        animation_indices,
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
     ));
 }
 
 pub fn movement(
-    mut commands: Commands,
     input: Res<Input<KeyCode>>,
     time: Res<Time>,
-    mut query: Query<(Entity, &mut KinematicCharacterController)>,
+    mut query: Query<&mut KinematicCharacterController>,
+    mut query_flip: Query<&mut TextureAtlasSprite, With<Player>>,
 ) {
-    let (entity, mut player) = query.single_mut();
+    let mut player = query.single_mut();
 
     let mut movement = 0.0;
 
+    let mut flip = query_flip.single_mut();
+
     if input.pressed(KeyCode::Right) {
         movement += time.delta_seconds() * PLAYER_VELOCITY_X;
-        commands.entity(entity).insert(Sprite {
-            flip_x: false,
-            ..default()
-        });
+        if flip.flip_x {
+            flip.flip_x = false;
+        }
     }
 
     if input.pressed(KeyCode::Left) {
         movement += time.delta_seconds() * PLAYER_VELOCITY_X * -1.0;
-        commands.entity(entity).insert(Sprite {
-            flip_x: true,
-            ..default()
-        });
+        if !flip.flip_x {
+            flip.flip_x = true;
+        }
     }
 
     match player.translation {
@@ -105,12 +120,15 @@ pub fn rise(
     }
 }
 
-pub fn fall(time: Res<Time>, mut query: Query<&mut KinematicCharacterController, Without<Jump>>) {
+pub fn fall(
+    time: Res<Time>,
+    mut query: Query<(&mut KinematicCharacterController, &mut Transform), Without<Jump>>,
+) {
     if query.is_empty() {
         return;
     }
 
-    let mut player = query.single_mut();
+    let (mut player, mut pos) = query.single_mut();
 
     // I am using two-thirds of the Y-velocity since I want the character to fall slower than it rises
     let movement = time.delta().as_secs_f32() * (PLAYER_VELOCITY_Y / 1.5) * -1.0;
@@ -118,5 +136,33 @@ pub fn fall(time: Res<Time>, mut query: Query<&mut KinematicCharacterController,
     match player.translation {
         Some(vec) => player.translation = Some(Vec2::new(vec.x, movement)),
         None => player.translation = Some(Vec2::new(0.0, movement)),
+    }
+
+    if pos.translation.y < WINDOW_BOTTOM_Y - 10.0 {
+        pos.translation = Vec3::new(WINDOW_LEFT_X + 100.0, WINDOW_BOTTOM_Y + 300.0, 0.0);
+    }
+}
+
+pub fn animate_sprite(
+    time: Res<Time>,
+    mut query: Query<(
+        &AnimationIndices,
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
+    )>,
+    input: Res<Input<KeyCode>>,
+) {
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+        if timer.just_finished() {
+            sprite.index = if sprite.index != indices.last
+                && (sprite.index != indices.first
+                    || (input.pressed(KeyCode::Left) || input.pressed(KeyCode::Right)))
+            {
+                sprite.index + 1
+            } else {
+                indices.first
+            };
+        }
     }
 }

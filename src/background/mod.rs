@@ -1,6 +1,6 @@
-use bevy::prelude::{App, Plugin, Startup};
+use bevy::prelude::{App, Plugin, Startup, Update};
 
-use systems::setup_background;
+use systems::{move_background, setup_background};
 
 mod components;
 mod systems;
@@ -9,6 +9,7 @@ pub struct BackgroundPlugin;
 
 impl Plugin for BackgroundPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_background);
+        app.add_systems(Startup, setup_background)
+            .add_systems(Update, move_background);
     }
 }

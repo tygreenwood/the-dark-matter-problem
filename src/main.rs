@@ -7,8 +7,10 @@ use bevy_rapier2d::{prelude::*, render::RapierDebugRenderPlugin};
 
 mod background;
 mod camera;
+mod mushrooms;
 mod platforms;
 mod player;
+mod saves;
 mod setup;
 
 use camera::CameraPlugin;
@@ -41,6 +43,7 @@ fn main() {
             CameraPlugin,
             PlatformsPlugin,
             BackgroundPlugin,
+            // MushroomsPlugin,
         ))
         .run();
 }
