@@ -4,6 +4,8 @@ use bevy::{
     time::{Time, Timer, TimerMode},
 };
 
+use crate::{setup::WINDOW_BOTTOM_Y, platforms::FLOOR_THICKNESS};
+
 use super::components::{AnimationIndices, AnimationTimer};
 
 pub fn animate_sprite(
@@ -31,19 +33,19 @@ pub fn setup_mushrooms(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    let texture_handle = asset_server.load("shroom/shroom.001.png");
+    let texture_handle = asset_server.load("shroom/Mushroom.png");
     let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 24.0), 7, 1, None, None);
+        TextureAtlas::from_grid(texture_handle, Vec2::new(13.0, 9.0), 31, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    let animation_indices = AnimationIndices { first: 1, last: 20 };
+    let animation_indices = AnimationIndices { first: 0, last: 30 };
     commands.spawn((
         SpriteSheetBundle {
             texture_atlas: texture_atlas_handle,
             sprite: TextureAtlasSprite::new(0),
-            transform: Transform::from_scale(Vec3::splat(6.0)),
+            transform: Transform {translation: Vec3::new(0., WINDOW_BOTTOM_Y + FLOOR_THICKNESS*3., 0.), scale: Vec3::new(5., 5., 1.), ..default()},
             ..default()
         },
         animation_indices,
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        AnimationTimer(Timer::from_seconds(0.03, TimerMode::Repeating)),
     ));
 }

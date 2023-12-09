@@ -13,6 +13,7 @@ mod player;
 mod saves;
 mod setup;
 
+use mushrooms::MushroomsPlugin;
 use camera::CameraPlugin;
 use platforms::PlatformsPlugin;
 use player::PlayerPlugin;
@@ -47,7 +48,7 @@ fn main() {
             CameraPlugin,
             PlatformsPlugin,
             BackgroundPlugin,
-            // MushroomsPlugin,
+            MushroomsPlugin,
         ))
         .run();
 }
