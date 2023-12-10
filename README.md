@@ -29,3 +29,7 @@ To update existing image (background / sprite animation / etc.)
    texture: asset_server.load("other_file_name.png"),
 4. Then, replace the file name with your new file and save
 5. Do git shenangins above
+
+
+TO DO:
+-how to add a sprite into the game (just to see, not to interact with)
