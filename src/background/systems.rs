@@ -10,10 +10,10 @@ use super::components::Background;
 pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SpriteBundle {
-            texture: asset_server.load("BackgroundTest1.png"),
+            texture: asset_server.load("BackgroundTest2(expanded).png"),
             transform: Transform {
-                translation: Vec3::new(0., 0., -2.),
-                scale: Vec3::new(18., 18., 1.),
+                translation: Vec3::new(150., 200., -2.),
+                scale: Vec3::new(5., 5., 1.),
                 ..default()
             },
             ..default()
