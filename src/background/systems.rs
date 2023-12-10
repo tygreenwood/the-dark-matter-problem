@@ -12,7 +12,7 @@ pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) 
         SpriteBundle {
             texture: asset_server.load("BackgroundTest2(expanded).png"),
             transform: Transform {
-                translation: Vec3::new(0., 0., -2.),
+                translation: Vec3::new(0., 0., -3.),
                 scale: Vec3::new(5., 5., 1.),
                 ..default()
             },

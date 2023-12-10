@@ -10,7 +10,7 @@ use bevy::{
 };
 use rand::Rng;
 
-use crate::{player::components::Player, setup::WINDOW_BOTTOM_Y};
+use crate::{platforms::FLOOR_THICKNESS, player::components::Player, setup::WINDOW_BOTTOM_Y};
 
 use super::components::Wheel;
 
@@ -18,7 +18,7 @@ pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SpriteBundle {
             transform: Transform {
-                translation: Vec3::new(-500., WINDOW_BOTTOM_Y + 200., -1.),
+                translation: Vec3::new(-500., WINDOW_BOTTOM_Y + 380. + FLOOR_THICKNESS, -2.),
                 scale: Vec3::new(5., 5., 1.),
                 ..default()
             },
@@ -27,6 +27,18 @@ pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Wheel { spin: 0. },
     ));
+
+    commands.spawn({
+        SpriteBundle {
+            transform: Transform {
+                translation: Vec3::new(-500., WINDOW_BOTTOM_Y + 255. + FLOOR_THICKNESS, -1.),
+                scale: Vec3::new(5., 5., 1.),
+                ..default()
+            },
+            texture: asset_server.load("WheelStand.png"),
+            ..default()
+        }
+    });
 }
 
 pub fn spin_wheel(
