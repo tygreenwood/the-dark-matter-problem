@@ -3,7 +3,7 @@ use bevy::prelude::{App, Component, Plugin, Startup, Update};
 use systems::{camera_follow_player, setup_camera};
 
 pub mod components;
-pub mod systems;
+mod systems;
 
 #[derive(Component)]
 pub struct CameraPlugin;

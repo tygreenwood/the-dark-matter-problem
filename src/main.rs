@@ -12,6 +12,7 @@ mod platforms;
 mod player;
 mod saves;
 mod setup;
+mod wheel;
 
 use camera::CameraPlugin;
 use mushrooms::MushroomsPlugin;
@@ -19,6 +20,7 @@ use platforms::PlatformsPlugin;
 use player::PlayerPlugin;
 use saves::SavesPlugin;
 use setup::{SetupPlugin, WINDOW_HEIGHT, WINDOW_WIDTH};
+use wheel::WheelPlugin;
 
 const COLOR_BACKGROUND: Color = Color::rgb(0.29, 0.31, 0.41);
 
@@ -51,6 +53,7 @@ fn main() {
             PlatformsPlugin,
             BackgroundPlugin,
             MushroomsPlugin,
+            WheelPlugin,
         ))
         .run();
 }
