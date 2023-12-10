@@ -24,7 +24,7 @@ To update existing image (background / sprite animation / etc.)
 
 1. Drag your new image from your file explorer to the assets folder
 2. Look for system.rs in the specific file you are updating, eg mushroom or player
-3. Use control+f for asset_server.load or your eyes to find something like the line -
+3. Use control+f for asset_server.load or your eyes to find something like one of these -
    let texture_handle = asset_server.load("file_name.png");
    texture: asset_server.load("other_file_name.png"),
 4. Then, replace the file name with your new file and save
