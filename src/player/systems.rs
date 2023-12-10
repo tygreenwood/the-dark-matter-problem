@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use super::components::{AnimationIndices, AnimationTimer, Jump, Player};
-use crate::setup::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X};
+use crate::{
+    saves::components::PositionSaveInformation,
+    setup::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
+};
 
 const PLAYER_VELOCITY_X: f32 = 400.0;
 
@@ -46,10 +49,11 @@ pub fn setup_player(
 pub fn movement(
     input: Res<Input<KeyCode>>,
     time: Res<Time>,
-    mut query: Query<&mut KinematicCharacterController>,
+    mut query: Query<(&mut KinematicCharacterController, &GlobalTransform)>,
     mut query_flip: Query<&mut TextureAtlasSprite, With<Player>>,
+    mut pos_save: ResMut<PositionSaveInformation>,
 ) {
-    let mut player = query.single_mut();
+    let (mut player, player_pos) = query.single_mut();
 
     let mut movement = 0.0;
 
@@ -73,6 +77,9 @@ pub fn movement(
         Some(vec) => player.translation = Some(Vec2::new(movement, vec.y)), // update if it already exists
         None => player.translation = Some(Vec2::new(movement, 0.0)),
     }
+
+    pos_save.x = player_pos.translation().x;
+    pos_save.y = player_pos.translation().y;
 }
 
 pub fn jump(

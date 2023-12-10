@@ -1,19 +1,21 @@
-use bevy::prelude::{App, Plugin, Startup, Update};
+use bevy::prelude::{App, Plugin, PreStartup, Update};
 
 use self::{
-    components::SaveEvent,
-    systems::{check_for_save, load_scene_system, save_scene_system},
+    components::{PositionSaveComponent, PositionSaveInformation, SaveEvent},
+    systems::{check_for_save, load_scene_system, move_player, save_scene_system},
 };
 
-mod components;
+pub mod components;
 mod systems;
 
 pub struct SavesPlugin;
 
 impl Plugin for SavesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<SaveEvent>()
-            .add_systems(Startup, load_scene_system)
-            .add_systems(Update, (check_for_save, save_scene_system));
+        app.init_resource::<PositionSaveInformation>()
+            .add_event::<SaveEvent>()
+            .register_type::<PositionSaveComponent>()
+            .add_systems(PreStartup, load_scene_system)
+            .add_systems(Update, (check_for_save, save_scene_system, move_player));
     }
 }

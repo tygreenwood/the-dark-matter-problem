@@ -21,7 +21,7 @@ impl PlatformBundle {
                     ..default()
                 },
                 transform: Transform {
-                    translation: Vec3::new(pos.x, WINDOW_BOTTOM_Y + (size.y / 2.0), 0.0),
+                    translation: Vec3::new(pos.x, WINDOW_BOTTOM_Y + (size.y / 2.0), -1.0),
                     scale: size.extend(1.0),
                     ..default()
                 },

@@ -26,7 +26,7 @@ pub fn setup_entities(mut commands: Commands) {
                 ..default()
             },
             transform: Transform {
-                translation: Vec3::new(0.0, WINDOW_BOTTOM_Y + FLOOR_THICKNESS / 2.0, 0.0),
+                translation: Vec3::new(0.0, WINDOW_BOTTOM_Y + FLOOR_THICKNESS / 2.0, -1.0),
                 scale: Vec3::new(WINDOW_WIDTH, FLOOR_THICKNESS, 1.0),
                 ..default()
             },
