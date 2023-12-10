@@ -22,7 +22,10 @@ Upload your changes to the World Wide Web
 
 To update existing image (background / sprite animation / etc.)
 
-1. Look for system.rs in the specific file you are updating, eg mushroom or player
-   Use control+f on asset_server.load or your eyes to find something like the line -
+1. Drag your new image from your file explorer to the assets folder
+2. Look for system.rs in the specific file you are updating, eg mushroom or player
+3. Use control+f for asset_server.load or your eyes to find something like the line -
    let texture_handle = asset_server.load("file_name.png");
-   texture: asset_server.load("BackgroundTest2(expanded).png"),
+   texture: asset_server.load("other_file_name.png"),
+4. Then, replace the file name with your new file and save
+5. Do git shenangins above
