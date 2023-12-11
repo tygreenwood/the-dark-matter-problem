@@ -14,7 +14,7 @@ pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) 
             texture: asset_server.load("background/Background_2.png"),
             transform: Transform {
                 translation: Vec3::new(0., 0., -3.),
-                scale: Vec3::new(5., 5., 1.),
+                scale: Vec3::new(2., 2., 1.),
                 ..default()
             },
             ..default()
