@@ -3,6 +3,7 @@ use bevy::prelude::{App, Plugin, Startup, Update};
 use self::systems::{animate_sprite, check_mushroom_hop, setup_mushrooms};
 
 mod components;
+mod configs;
 mod systems;
 
 pub struct MushroomsPlugin;

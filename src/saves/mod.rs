@@ -6,6 +6,7 @@ use self::{
 };
 
 pub mod components;
+mod configs;
 mod systems;
 
 pub struct SavesPlugin;

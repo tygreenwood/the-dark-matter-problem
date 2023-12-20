@@ -10,7 +10,9 @@ use bevy::{
 };
 use rand::Rng;
 
-use crate::{platforms::FLOOR_THICKNESS, player::components::Player, setup::WINDOW_BOTTOM_Y};
+use crate::{
+    platforms::FLOOR_THICKNESS, player::components::Player, setup::configs::WINDOW_BOTTOM_Y,
+};
 
 use super::components::Wheel;
 

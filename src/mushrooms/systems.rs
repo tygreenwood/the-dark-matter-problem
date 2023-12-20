@@ -10,17 +10,25 @@ use bevy_rapier2d::{
     plugin::RapierContext,
 };
 
-use crate::{platforms::FLOOR_THICKNESS, player::components::Player, setup::WINDOW_BOTTOM_Y};
+use crate::{
+    platforms::FLOOR_THICKNESS, player::components::Player, setup::configs::WINDOW_BOTTOM_Y,
+};
 
-use super::components::{AnimationIndices, AnimationTimer, Mushroom};
+use super::{
+    components::{AnimationIndices, AnimationTimer, Mushroom},
+    configs::MUSHROOM_PATH,
+};
 
 pub fn animate_sprite(
     time: Res<Time>,
-    mut query: Query<(
-        &AnimationIndices,
-        &mut AnimationTimer,
-        &mut TextureAtlasSprite,
-    )>,
+    mut query: Query<
+        (
+            &AnimationIndices,
+            &mut AnimationTimer,
+            &mut TextureAtlasSprite,
+        ),
+        With<Mushroom>,
+    >,
 ) {
     for (indices, mut timer, mut sprite) in &mut query {
         timer.tick(time.delta());
@@ -39,7 +47,7 @@ pub fn setup_mushrooms(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    let texture_handle = asset_server.load("shroom/Mushroom.png");
+    let texture_handle = asset_server.load(MUSHROOM_PATH);
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(13.0, 9.0), 31, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
@@ -60,6 +68,7 @@ pub fn setup_mushrooms(
             AnimationTimer(Timer::from_seconds(0.03, TimerMode::Repeating)),
             RigidBody::Fixed,
             Collider::cuboid(0.5, 0.5),
+            Mushroom,
         ))
         .insert(Sensor)
         .insert(ActiveEvents::CONTACT_FORCE_EVENTS);

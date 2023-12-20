@@ -1,10 +1,13 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use super::components::{AnimationIndices, AnimationTimer, Jump, Player};
+use super::{
+    components::{AnimationIndices, AnimationTimer, Jump, Player},
+    configs::PLAYER_RUNNING_ANIMATION_PATH,
+};
 use crate::{
     saves::components::PositionSaveInformation,
-    setup::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
+    setup::configs::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
 };
 
 const PLAYER_VELOCITY_X: f32 = 400.0;
@@ -18,7 +21,7 @@ pub fn setup_player(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    let texture_handle = asset_server.load("player_sprites/SpaceGuyMk5RunningAnimation1.png");
+    let texture_handle = asset_server.load(PLAYER_RUNNING_ANIMATION_PATH);
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(19.0, 32.0), 7, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
@@ -152,11 +155,14 @@ pub fn fall(
 
 pub fn animate_sprite(
     time: Res<Time>,
-    mut query: Query<(
-        &AnimationIndices,
-        &mut AnimationTimer,
-        &mut TextureAtlasSprite,
-    )>,
+    mut query: Query<
+        (
+            &AnimationIndices,
+            &mut AnimationTimer,
+            &mut TextureAtlasSprite,
+        ),
+        With<Player>,
+    >,
     input: Res<Input<KeyCode>>,
 ) {
     for (indices, mut timer, mut sprite) in &mut query {

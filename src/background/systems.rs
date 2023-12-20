@@ -1,17 +1,29 @@
-use bevy::{
-    prelude::{default, AssetServer, Commands, GlobalTransform, Query, Res, Transform, Vec3, With},
-    sprite::SpriteBundle,
-    time::Time, // remove this if we get rid of the animated backgrounds
-};
+use bevy::prelude::*;
 
 use crate::player::components::Player;
 
-use super::components::Background;
+use super::{
+    components::{AnimationIndices, AnimationTimer, Background},
+    configs::SPACE_PLANET_ANIMATION_PATH,
+};
 
-pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_background(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
+    let texture_handle = asset_server.load(SPACE_PLANET_ANIMATION_PATH);
+    let texture_atlas =
+        TextureAtlas::from_grid(texture_handle, Vec2::new(1600.0, 950.0), 8, 8, None, None);
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let animation_indices = AnimationIndices { first: 0, last: 59 };
     commands.spawn((
-        SpriteBundle {
-            texture: asset_server.load("background/Background_2.png"),
+        SpriteSheetBundle {
+            sprite: TextureAtlasSprite {
+                flip_x: false,
+                ..default()
+            },
+            texture_atlas: texture_atlas_handle,
             transform: Transform {
                 translation: Vec3::new(0., 0., -3.),
                 scale: Vec3::new(2., 2., 1.),
@@ -19,32 +31,47 @@ pub fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) 
             },
             ..default()
         },
-        //animation_indicies,
-        //AnimationTimer(Timer::from_seconds(0.03, TimerMode::Repeating)),
         Background,
+        animation_indices,
+        AnimationTimer {
+            timer: Timer::from_seconds(0.1, TimerMode::Repeating),
+            flip: false,
+        },
     ));
 }
-// ok listen this is in the middle of not working, switching the background
-// to a non animated one in the meantime thx
-// pub fn animate_sprite(
-//     time: Res<Time>,
-//     mut query: Query<(
-//         &AnimationIndices,
-//         &mut AnimationTimer,
-//         &mut TextureAtlasSprite,
-//     )>,
-// ) {
-//     for (indices, mut timer, mut sprite) in &mut query {
-//         timer.tick(time.delta());
-//         if timer.just_finished() {
-//             sprite.index = if sprite.index == indices.last {
-//                 indices.first
-//             } else {
-//                 sprite.index + 1
-//             };
-//         }
-//     }
-// }
+
+pub fn animate_background(
+    time: Res<Time>,
+    mut query: Query<
+        (
+            &AnimationIndices,
+            &mut AnimationTimer,
+            &mut TextureAtlasSprite,
+        ),
+        With<Background>,
+    >,
+) {
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.timer.tick(time.delta());
+        if timer.timer.just_finished() {
+            if !timer.flip {
+                if sprite.index == indices.last {
+                    timer.flip = true;
+                    sprite.index -= 1;
+                } else {
+                    sprite.index += 1;
+                }
+            } else {
+                if sprite.index == indices.first {
+                    timer.flip = false;
+                    sprite.index += 1;
+                } else {
+                    sprite.index -= 1;
+                }
+            };
+        }
+    }
+}
 
 pub fn move_background(
     query_player: Query<&GlobalTransform, With<Player>>,

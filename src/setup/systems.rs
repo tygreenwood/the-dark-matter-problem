@@ -1,8 +1,6 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::setup::WINDOW_HEIGHT;
-
-use super::resources::DisplayScale;
+use super::{configs::WINDOW_HEIGHT, resources::DisplayScale};
 
 pub fn setup_graphics(
     mut scale: ResMut<DisplayScale>,

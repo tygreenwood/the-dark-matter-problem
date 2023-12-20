@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::{Collider, RigidBody};
 
-use crate::setup::{WINDOW_BOTTOM_Y, WINDOW_WIDTH};
+use crate::setup::configs::{WINDOW_BOTTOM_Y, WINDOW_WIDTH};
 
 use super::{components::PlatformBundle, COLOR_FLOOR, FLOOR_THICKNESS};
 

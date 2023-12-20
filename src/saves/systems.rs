@@ -4,17 +4,17 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 
 use crate::player::components::Player;
 
-use super::components::{PositionSaveComponent, PositionSaveInformation, SaveEvent};
-
-// The initial scene file will be loaded below and not change when the scene is saved
-const SCENE_FILE_PATH: &str = "scenes/scene.scn.ron";
+use super::{
+    components::{PositionSaveComponent, PositionSaveInformation, SaveEvent},
+    configs::SAVES_PATH,
+};
 
 pub fn load_scene_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     // "Spawning" a scene bundle creates a new entity and spawns new instances
     // of the given scene's entities as children of that entity.
     commands.spawn(DynamicSceneBundle {
         // Scenes are loaded just like any other asset.
-        scene: asset_server.load(SCENE_FILE_PATH),
+        scene: asset_server.load(SAVES_PATH),
         ..default()
     });
 }
@@ -71,7 +71,7 @@ pub fn save_scene_system(world: &mut World) {
     IoTaskPool::get()
         .spawn(async move {
             // Write the scene RON data to file
-            File::create(format!("assets/{SCENE_FILE_PATH}"))
+            File::create(format!("assets/{SAVES_PATH}"))
                 .and_then(|mut file| file.write(serialized_scene.as_bytes()))
                 .expect("Error while writing scene to file");
         })

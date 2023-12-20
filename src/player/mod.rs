@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use systems::*;
 
 pub mod components;
+mod configs;
 mod systems;
 
 pub struct PlayerPlugin;
