@@ -2,7 +2,8 @@ use bevy::prelude::{App, Plugin, Startup, Update};
 
 use self::systems::{setup_wheel, spin, spin_wheel};
 
-mod components;
+pub mod components;
+mod configs;
 mod systems;
 
 pub struct WheelPlugin;

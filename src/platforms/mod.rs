@@ -1,6 +1,7 @@
 use bevy::prelude::{App, Color, Plugin, Startup};
 
 pub mod components;
+mod configs;
 mod systems;
 
 use systems::setup_entities;

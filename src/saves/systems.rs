@@ -2,11 +2,12 @@ use std::{fs::File, io::Write};
 
 use bevy::{prelude::*, tasks::IoTaskPool};
 
-use crate::player::components::Player;
+use crate::{player::components::Player, wheel::components::Wheel};
 
 use super::{
-    components::{PositionSaveComponent, PositionSaveInformation, SaveEvent},
+    components::{PositionSaveComponent, WheelSaveComponent},
     configs::SAVES_PATH,
+    resources::{PositionSaveInformation, SaveGame, WheelSaveInformation},
 };
 
 pub fn load_scene_system(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -19,61 +20,73 @@ pub fn load_scene_system(mut commands: Commands, asset_server: Res<AssetServer>)
     });
 }
 
-pub fn move_player(
+pub fn load_save(
     mut commands: Commands,
-    mut query_player: Query<&mut Transform, With<Player>>,
+    mut query_player: Query<&mut Transform, (With<Player>, Without<Wheel>)>,
+    mut query_wheel: Query<&mut Transform, (With<Wheel>, Without<Player>)>,
     position_save_query: Query<(Entity, &PositionSaveComponent)>,
+    wheel_save_query: Query<(Entity, &WheelSaveComponent)>,
 ) {
     let mut player = query_player.single_mut();
+    let mut wheel = query_wheel.single_mut();
 
     if let Ok((entity, position)) = position_save_query.get_single() {
         player.translation.x = position.x;
         player.translation.y = position.y;
         commands.entity(entity).despawn();
     }
+
+    if let Ok((entity, rotation)) = wheel_save_query.get_single() {
+        wheel.rotation = rotation.rot;
+        commands.entity(entity).despawn();
+    }
 }
 
-pub fn check_for_save(input: Res<Input<KeyCode>>, mut event: EventWriter<SaveEvent>) {
+pub fn check_for_save(mut save_game: ResMut<SaveGame>, input: Res<Input<KeyCode>>) {
     if input.pressed(KeyCode::P) {
-        event.send_default();
+        save_game.save = true;
     }
 }
 
 pub fn save_scene_system(world: &mut World) {
-    // Scenes can be created from any ECS World.
-    // You can either create a new one for the scene or use the current World.
-    // For demonstration purposes, we'll create a new one.
-    let mut scene_world = World::new();
+    if world.resource::<SaveGame>().save {
+        if let Some(mut save_game) = world.get_resource_mut::<SaveGame>() {
+            save_game.save = false;
+        }
 
-    // The `TypeRegistry` resource contains information about all registered types (including components).
-    // This is used to construct scenes, so we'll want to ensure that our previous type registrations
-    // exist in this new scene world as well.
-    // To do this, we can simply clone the `AppTypeRegistry` resource.
-    let type_registry = world.resource::<AppTypeRegistry>().clone();
-    scene_world.insert_resource(type_registry);
-    let pos_save = world.resource::<PositionSaveInformation>();
-    scene_world.spawn(PositionSaveComponent {
-        x: pos_save.x,
-        y: pos_save.y,
-    });
+        println!("Saving game");
 
-    // With our sample world ready to go, we can now create our scene:
-    let scene = DynamicScene::from_world(&scene_world);
+        let mut scene_world = World::new();
 
-    // Scenes can be serialized like this:
-    let type_registry_ref = scene_world.resource::<AppTypeRegistry>();
-    let serialized_scene = scene.serialize_ron(type_registry_ref).unwrap();
+        let type_registry = world.resource::<AppTypeRegistry>().clone();
+        scene_world.insert_resource(type_registry);
+        let pos_save = world.resource::<PositionSaveInformation>();
+        scene_world.spawn(PositionSaveComponent {
+            x: pos_save.x,
+            y: pos_save.y,
+        });
 
-    // Writing the scene to a new file. Using a task to avoid calling the filesystem APIs in a system
-    // as they are blocking
-    // This can't work in WASM as there is no filesystem access
-    #[cfg(not(target_arch = "wasm32"))]
-    IoTaskPool::get()
-        .spawn(async move {
-            // Write the scene RON data to file
-            File::create(format!("assets/{SAVES_PATH}"))
-                .and_then(|mut file| file.write(serialized_scene.as_bytes()))
-                .expect("Error while writing scene to file");
-        })
-        .detach();
+        let wheel_rot_save = world.resource::<WheelSaveInformation>();
+        scene_world.spawn(WheelSaveComponent {
+            rot: wheel_rot_save.rot,
+        });
+
+        let scene = DynamicScene::from_world(&scene_world);
+
+        let type_registry_ref = scene_world.resource::<AppTypeRegistry>();
+        let serialized_scene = scene.serialize_ron(type_registry_ref).unwrap();
+
+        // Writing the scene to a new file. Using a task to avoid calling the filesystem APIs in a system
+        // as they are blocking
+        // This can't work in WASM as there is no filesystem access
+        #[cfg(not(target_arch = "wasm32"))]
+        IoTaskPool::get()
+            .spawn(async move {
+                // Write the scene RON data to file
+                File::create(format!("assets/{SAVES_PATH}"))
+                    .and_then(|mut file| file.write(serialized_scene.as_bytes()))
+                    .expect("Error while writing scene to file");
+            })
+            .detach();
+    }
 }

@@ -10,6 +10,9 @@ pub struct Jump(pub f32);
 pub struct Player;
 
 #[derive(Component)]
+pub struct Cat;
+
+#[derive(Component)]
 pub struct AnimationIndices {
     pub first: usize,
     pub last: usize,

@@ -4,7 +4,10 @@ use bevy::{
 };
 
 #[derive(Component)]
-pub struct Background;
+pub struct SpaceBackground;
+
+#[derive(Component)]
+pub struct HorizonBackground;
 
 #[derive(Component)]
 pub struct AnimationIndices {

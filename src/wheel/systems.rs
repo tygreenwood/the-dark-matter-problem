@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 
 use bevy::{
+    ecs::system::ResMut,
     prelude::{
         default, AssetServer, Commands, GlobalTransform, Input, KeyCode, Query, Res, Transform,
         Vec3, With,
@@ -11,10 +12,14 @@ use bevy::{
 use rand::Rng;
 
 use crate::{
-    platforms::FLOOR_THICKNESS, player::components::Player, setup::configs::WINDOW_BOTTOM_Y,
+    platforms::FLOOR_THICKNESS, player::components::Player, saves::resources::WheelSaveInformation,
+    setup::configs::WINDOW_BOTTOM_Y,
 };
 
-use super::components::Wheel;
+use super::{
+    components::Wheel,
+    configs::{WHEEL_PATH, WHEEL_STAND_PATH},
+};
 
 pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
@@ -24,7 +29,7 @@ pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
                 scale: Vec3::new(5., 5., 1.),
                 ..default()
             },
-            texture: asset_server.load("wheel.png"),
+            texture: asset_server.load(WHEEL_PATH),
             ..default()
         },
         Wheel { spin: 0. },
@@ -37,7 +42,7 @@ pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
                 scale: Vec3::new(5., 5., 1.),
                 ..default()
             },
-            texture: asset_server.load("WheelStand.png"),
+            texture: asset_server.load(WHEEL_STAND_PATH),
             ..default()
         }
     });
@@ -59,18 +64,22 @@ pub fn spin_wheel(
         && rot.spin == 0.
     {
         rot.spin = rng.gen_range(0.0..360.) + 1080.;
-        println!("Spinning: {} degrees", rot.spin);
     }
 }
 
-pub fn spin(mut query_wheel: Query<(&mut Transform, &mut Wheel)>, time: Res<Time>) {
-    if let Ok((mut wheel, mut rot)) = query_wheel.get_single_mut() {
+pub fn spin(
+    mut query_wheel: Query<(&mut Transform, &mut Wheel, &GlobalTransform)>,
+    time: Res<Time>,
+    mut wheel_save: ResMut<WheelSaveInformation>,
+) {
+    if let Ok((mut wheel, mut rot, transform)) = query_wheel.get_single_mut() {
         if rot.spin > 0. {
             wheel.rotate_z(300. * (PI / 180.) * time.delta_seconds());
             rot.spin -= 300. * time.delta_seconds();
             if rot.spin < 0. {
                 rot.spin = 0.;
             }
+            wheel_save.rot = transform.to_scale_rotation_translation().1;
         }
     }
 }
