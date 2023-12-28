@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+pub const PROTOCOL_ID: u64 = 100;
+
 pub const WINDOW_WIDTH: f32 = 1920.0;
 pub const WINDOW_HEIGHT: f32 = 1080.0;
 

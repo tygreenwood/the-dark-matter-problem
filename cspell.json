@@ -5,12 +5,15 @@
     "dictionaries": [],
     "words": [
         "AHHH",
+        "bincode",
         "Borderless",
         "consts",
         "despawn",
         "Fullscreen",
         "hellscape",
-        "powi"
+        "Netcode",
+        "powi",
+        "renet"
     ],
     "ignoreWords": [
         "bodil"

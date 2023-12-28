@@ -1,7 +1,7 @@
 use bevy::{prelude::*, tasks::IoTaskPool};
 use std::{fs::File, io::Write};
 
-use crate::{player::components::Player, wheel::components::Wheel};
+use crate::{player::components::ControlledPlayer, wheel::components::Wheel};
 
 use super::{
     components::{PositionSaveComponent, WheelSaveComponent},
@@ -21,8 +21,8 @@ pub fn load_scene_system(mut commands: Commands, asset_server: Res<AssetServer>)
 
 pub fn load_save(
     mut commands: Commands,
-    mut query_player: Query<&mut Transform, (With<Player>, Without<Wheel>)>,
-    mut query_wheel: Query<&mut Transform, (With<Wheel>, Without<Player>)>,
+    mut query_player: Query<&mut Transform, (With<ControlledPlayer>, Without<Wheel>)>,
+    mut query_wheel: Query<&mut Transform, (With<Wheel>, Without<ControlledPlayer>)>,
     position_save_query: Query<(Entity, &PositionSaveComponent)>,
     wheel_save_query: Query<(Entity, &WheelSaveComponent)>,
 ) {

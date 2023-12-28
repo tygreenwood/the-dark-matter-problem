@@ -5,7 +5,7 @@ use crate::setup::configs::AppStates;
 use self::systems::*;
 
 pub mod components;
-mod configs;
+pub mod configs;
 mod systems;
 
 pub struct PlayerPlugin;

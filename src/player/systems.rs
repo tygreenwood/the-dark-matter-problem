@@ -7,7 +7,7 @@ use crate::{
 };
 
 use super::{
-    components::{AnimationIndices, AnimationTimer, Cat, Jump, Player},
+    components::{AnimationIndices, AnimationTimer, Cat, ControlledPlayer, Jump},
     configs::{CAT_ANIMATION_PATH, PLAYER_RUNNING_ANIMATION_PATH},
 };
 
@@ -51,7 +51,7 @@ pub fn setup_player(
                 },
                 ..default()
             },
-            Player,
+            ControlledPlayer,
             RigidBody::KinematicPositionBased,
             Collider::cuboid(9.5, 15.0),
             KinematicCharacterController::default(),
@@ -80,10 +80,10 @@ pub fn movement(
     input: Res<Input<KeyCode>>,
     time: Res<Time>,
     mut query: Query<(&mut KinematicCharacterController, &GlobalTransform)>,
-    mut query_player_flip: Query<&mut TextureAtlasSprite, (With<Player>, Without<Cat>)>,
+    mut query_player_flip: Query<&mut TextureAtlasSprite, (With<ControlledPlayer>, Without<Cat>)>,
     mut query_cat_flip: Query<
         (&mut TextureAtlasSprite, &mut Transform),
-        (With<Cat>, Without<Player>),
+        (With<Cat>, Without<ControlledPlayer>),
     >,
     mut pos_save: ResMut<PositionSaveInformation>,
 ) {
@@ -197,7 +197,7 @@ pub fn animate_sprite(
             &mut AnimationTimer,
             &mut TextureAtlasSprite,
         ),
-        (With<Player>, Without<Cat>),
+        (With<ControlledPlayer>, Without<Cat>),
     >,
     mut query_cat: Query<
         (
@@ -205,7 +205,7 @@ pub fn animate_sprite(
             &mut AnimationTimer,
             &mut TextureAtlasSprite,
         ),
-        (With<Cat>, Without<Player>),
+        (With<Cat>, Without<ControlledPlayer>),
     >,
     input: Res<Input<KeyCode>>,
 ) {
@@ -240,7 +240,7 @@ pub fn animate_sprite(
 
 pub fn cleanup(
     mut commands: Commands,
-    query_sprites: Query<Entity, Or<(With<Player>, With<Cat>)>>,
+    query_sprites: Query<Entity, Or<(With<ControlledPlayer>, With<Cat>)>>,
 ) {
     for entity in &query_sprites {
         commands.entity(entity).despawn();

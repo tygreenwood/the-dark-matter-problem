@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{player::components::Player, setup::resources::DisplayScale};
+use crate::{player::components::ControlledPlayer, setup::resources::DisplayScale};
 
 use super::components::Camera;
 
@@ -21,7 +21,7 @@ pub fn setup_camera(mut commands: Commands, scale: Res<DisplayScale>) {
 
 pub fn camera_follow_player(
     mut camera: Query<&mut Transform, With<Camera>>,
-    player: Query<&GlobalTransform, With<Player>>,
+    player: Query<&GlobalTransform, With<ControlledPlayer>>,
 ) {
     if let Ok(player_transform) = player.get_single() {
         let mut camera_transform = camera.single_mut();

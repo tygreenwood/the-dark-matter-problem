@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    platforms::configs::FLOOR_THICKNESS, player::components::Player,
+    platforms::configs::FLOOR_THICKNESS, player::components::ControlledPlayer,
     setup::configs::WINDOW_BOTTOM_Y,
 };
 
@@ -68,7 +68,7 @@ pub fn setup_mushrooms(
 
 pub fn check_mushroom_hop(
     rapier_context: Res<RapierContext>,
-    player_query: Query<Entity, With<Player>>,
+    player_query: Query<Entity, With<ControlledPlayer>>,
     mushroom_query: Query<Entity, With<Mushroom>>,
 ) {
     let player = player_query.single();

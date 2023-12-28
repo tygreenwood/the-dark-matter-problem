@@ -3,7 +3,7 @@ use rand::Rng;
 use std::f32::consts::PI;
 
 use crate::{
-    platforms::configs::FLOOR_THICKNESS, player::components::Player,
+    platforms::configs::FLOOR_THICKNESS, player::components::ControlledPlayer,
     saves::resources::WheelSaveInformation, setup::configs::WINDOW_BOTTOM_Y,
 };
 
@@ -41,7 +41,7 @@ pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn spin_wheel(
-    query_player: Query<&GlobalTransform, With<Player>>,
+    query_player: Query<&GlobalTransform, With<ControlledPlayer>>,
     mut query_wheel: Query<(&GlobalTransform, &mut Wheel)>,
     input: Res<Input<KeyCode>>,
 ) {

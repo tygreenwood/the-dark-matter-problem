@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::player::components::Player;
+use crate::player::components::ControlledPlayer;
 
 use super::{
     components::{AnimationIndices, AnimationTimer, HorizonBackground, SpaceBackground},
@@ -89,7 +89,7 @@ pub fn animate_background(
 }
 
 pub fn move_background(
-    query_player: Query<&GlobalTransform, With<Player>>,
+    query_player: Query<&GlobalTransform, With<ControlledPlayer>>,
     mut query_space_background: Query<
         &mut Transform,
         (With<SpaceBackground>, Without<HorizonBackground>),
