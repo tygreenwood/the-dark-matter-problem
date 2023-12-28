@@ -66,7 +66,7 @@ fn main() {
             WheelPlugin,
             MainMenuPlugin,
         ));
-    #[cfg(feature = "default")]
+    #[cfg(feature = "server")]
     app.add_plugins(ServerPlugin);
 
     #[cfg(feature = "client")]

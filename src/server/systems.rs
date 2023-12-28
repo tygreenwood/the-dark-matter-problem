@@ -4,7 +4,11 @@ use bevy_renet::renet::{
     ConnectionConfig, RenetServer, ServerEvent,
 };
 use bevy_renet::transport::NetcodeServerPlugin;
-use std::{net::UdpSocket, time::SystemTime};
+use local_ip_address::local_ip;
+use std::{
+    net::{SocketAddr, UdpSocket},
+    time::SystemTime,
+};
 
 use crate::{
     client::components::{ClientChannel, PlayerTransform},
@@ -22,8 +26,14 @@ pub fn add_netcode_network(app: &mut App) {
 
     let server = RenetServer::new(ConnectionConfig::default());
 
-    let public_addr = "127.0.0.1:5000".parse().unwrap();
-    let socket = UdpSocket::bind(public_addr).unwrap();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let public_ip = rt.block_on(public_ip::addr()).unwrap();
+    let public_addr = SocketAddr::new(public_ip, 42069);
+
+    println!("Running on address: {}", public_addr);
+
+    let inbound_server_addr = SocketAddr::new(local_ip().unwrap(), 42069);
+    let socket = UdpSocket::bind(inbound_server_addr).unwrap();
     let current_time: std::time::Duration = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap();

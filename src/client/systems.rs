@@ -6,7 +6,11 @@ use bevy_renet::{
         ConnectionConfig, RenetClient,
     },
 };
-use std::{net::UdpSocket, time::SystemTime};
+use local_ip_address::local_ip;
+use std::{
+    net::{SocketAddr, UdpSocket},
+    time::SystemTime,
+};
 
 use crate::{
     client::components::CurrentClientId, player::components::ControlledPlayer,
@@ -23,7 +27,9 @@ pub fn add_netcode_network(app: &mut App) {
     let client = RenetClient::new(ConnectionConfig::default());
 
     let server_addr = "127.0.0.1:5000".parse().unwrap();
-    let socket = UdpSocket::bind("127.0.0.1:0").unwrap();
+
+    let local_addr = SocketAddr::new(local_ip().unwrap(), 0);
+    let socket = UdpSocket::bind(local_addr).unwrap();
     let current_time = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap();
