@@ -1,7 +1,4 @@
-use bevy::prelude::{
-    default, Camera2dBundle, Commands, GlobalTransform, OrthographicProjection, Query, Res,
-    Transform, With,
-};
+use bevy::prelude::*;
 
 use crate::{player::components::Player, setup::resources::DisplayScale};
 

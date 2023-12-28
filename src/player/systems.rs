@@ -1,13 +1,14 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use super::{
-    components::{AnimationIndices, AnimationTimer, Cat, Jump, Player},
-    configs::{CAT_ANIMATION_PATH, PLAYER_RUNNING_ANIMATION_PATH},
-};
 use crate::{
     saves::resources::PositionSaveInformation,
     setup::configs::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
+};
+
+use super::{
+    components::{AnimationIndices, AnimationTimer, Cat, Jump, Player},
+    configs::{CAT_ANIMATION_PATH, PLAYER_RUNNING_ANIMATION_PATH},
 };
 
 const PLAYER_VELOCITY_X: f32 = 400.0;
@@ -234,5 +235,14 @@ pub fn animate_sprite(
                 indices.first
             };
         }
+    }
+}
+
+pub fn cleanup(
+    mut commands: Commands,
+    query_sprites: Query<Entity, Or<(With<Player>, With<Cat>)>>,
+) {
+    for entity in &query_sprites {
+        commands.entity(entity).despawn();
     }
 }

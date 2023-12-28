@@ -1,23 +1,14 @@
+use bevy::prelude::*;
+use rand::Rng;
 use std::f32::consts::PI;
 
-use bevy::{
-    ecs::system::ResMut,
-    prelude::{
-        default, AssetServer, Commands, GlobalTransform, Input, KeyCode, Query, Res, Transform,
-        Vec3, With,
-    },
-    sprite::SpriteBundle,
-    time::Time,
-};
-use rand::Rng;
-
 use crate::{
-    platforms::FLOOR_THICKNESS, player::components::Player, saves::resources::WheelSaveInformation,
-    setup::configs::WINDOW_BOTTOM_Y,
+    platforms::configs::FLOOR_THICKNESS, player::components::Player,
+    saves::resources::WheelSaveInformation, setup::configs::WINDOW_BOTTOM_Y,
 };
 
 use super::{
-    components::Wheel,
+    components::{Wheel, WheelStand},
     configs::{WHEEL_PATH, WHEEL_STAND_PATH},
 };
 
@@ -35,7 +26,7 @@ pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
         Wheel { spin: 0. },
     ));
 
-    commands.spawn({
+    commands.spawn((
         SpriteBundle {
             transform: Transform {
                 translation: Vec3::new(-500., WINDOW_BOTTOM_Y + 255. + FLOOR_THICKNESS, -1.),
@@ -44,8 +35,9 @@ pub fn setup_wheel(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             texture: asset_server.load(WHEEL_STAND_PATH),
             ..default()
-        }
-    });
+        },
+        WheelStand,
+    ));
 }
 
 pub fn spin_wheel(
@@ -81,5 +73,14 @@ pub fn spin(
             }
             wheel_save.rot = transform.to_scale_rotation_translation().1;
         }
+    }
+}
+
+pub fn cleanup(
+    mut commands: Commands,
+    query_wheel_parts: Query<Entity, Or<(With<Wheel>, With<WheelStand>)>>,
+) {
+    for entity in &query_wheel_parts {
+        commands.entity(entity).despawn();
     }
 }

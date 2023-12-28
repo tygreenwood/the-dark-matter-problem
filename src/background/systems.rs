@@ -106,3 +106,12 @@ pub fn move_background(
     space_background.translation.x = player.translation().x * 0.9;
     horizon_background.translation.x = -player.translation().x * 0.1;
 }
+
+pub fn cleanup(
+    mut commands: Commands,
+    query_backgrounds: Query<Entity, Or<(With<SpaceBackground>, With<HorizonBackground>)>>,
+) {
+    for entity in &query_backgrounds {
+        commands.entity(entity).despawn();
+    }
+}

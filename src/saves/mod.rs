@@ -1,9 +1,11 @@
-use bevy::prelude::{App, Plugin, PreStartup, Update};
+use bevy::prelude::*;
+
+use crate::setup::configs::AppStates;
 
 use self::{
     components::{PositionSaveComponent, WheelSaveComponent},
     resources::{PositionSaveInformation, SaveGame, WheelSaveInformation},
-    systems::{check_for_save, load_save, load_scene_system, save_scene_system},
+    systems::*,
 };
 
 mod components;
@@ -20,7 +22,13 @@ impl Plugin for SavesPlugin {
             .init_resource::<SaveGame>()
             .register_type::<WheelSaveComponent>()
             .register_type::<PositionSaveComponent>()
-            .add_systems(PreStartup, load_scene_system)
-            .add_systems(Update, (save_scene_system, check_for_save, load_save));
+            .add_systems(Startup, load_scene_system)
+            .add_systems(
+                Update,
+                (
+                    (save_scene_system, check_for_save).run_if(in_state(AppStates::Game)),
+                    load_save,
+                ),
+            );
     }
 }

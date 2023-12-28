@@ -1,6 +1,5 @@
-use std::{fs::File, io::Write};
-
 use bevy::{prelude::*, tasks::IoTaskPool};
+use std::{fs::File, io::Write};
 
 use crate::{player::components::Player, wheel::components::Wheel};
 
@@ -53,8 +52,6 @@ pub fn save_scene_system(world: &mut World) {
         if let Some(mut save_game) = world.get_resource_mut::<SaveGame>() {
             save_game.save = false;
         }
-
-        println!("Saving game");
 
         let mut scene_world = World::new();
 

@@ -3,7 +3,7 @@ use bevy_rapier2d::prelude::{Collider, RigidBody};
 
 use crate::setup::configs::WINDOW_BOTTOM_Y;
 
-use super::COLOR_PLATFORM;
+use super::configs::COLOR_PLATFORM;
 
 #[derive(Bundle)]
 pub struct PlatformBundle {

@@ -1,6 +1,8 @@
-use bevy::prelude::{App, Plugin, Startup, Update};
+use bevy::prelude::*;
 
-use self::systems::{setup_wheel, spin, spin_wheel};
+use crate::setup::configs::AppStates;
+
+use self::systems::*;
 
 pub mod components;
 mod configs;
@@ -10,7 +12,8 @@ pub struct WheelPlugin;
 
 impl Plugin for WheelPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_wheel)
-            .add_systems(Update, (spin, spin_wheel));
+        app.add_systems(OnEnter(AppStates::Game), setup_wheel)
+            .add_systems(Update, (spin, spin_wheel).run_if(in_state(AppStates::Game)))
+            .add_systems(OnExit(AppStates::Game), cleanup);
     }
 }

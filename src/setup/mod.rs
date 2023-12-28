@@ -1,7 +1,6 @@
 use bevy::{prelude::*, window::close_on_esc};
 
-use resources::DisplayScale;
-use systems::setup_graphics;
+use self::{resources::DisplayScale, systems::*};
 
 pub mod configs;
 pub mod resources;

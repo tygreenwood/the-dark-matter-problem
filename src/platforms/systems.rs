@@ -1,9 +1,12 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::{Collider, RigidBody};
+use bevy_rapier2d::prelude::*;
 
 use crate::setup::configs::{WINDOW_BOTTOM_Y, WINDOW_WIDTH};
 
-use super::{components::PlatformBundle, COLOR_FLOOR, FLOOR_THICKNESS};
+use super::{
+    components::PlatformBundle,
+    configs::{COLOR_FLOOR, FLOOR_THICKNESS},
+};
 
 pub fn setup_entities(mut commands: Commands) {
     commands.spawn(PlatformBundle::new(

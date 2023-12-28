@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::{Component, Deref, DerefMut},
-    time::Timer,
-};
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Mushroom;

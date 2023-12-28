@@ -1,4 +1,3 @@
-use background::BackgroundPlugin;
 use bevy::{
     prelude::*,
     window::{WindowMode, WindowResolution},
@@ -14,13 +13,14 @@ mod saves;
 mod setup;
 mod wheel;
 
+use background::BackgroundPlugin;
 use camera::CameraPlugin;
 use mushrooms::MushroomsPlugin;
 use platforms::PlatformsPlugin;
 use player::PlayerPlugin;
 use saves::SavesPlugin;
 use setup::{
-    configs::{WINDOW_HEIGHT, WINDOW_WIDTH},
+    configs::{AppStates, WINDOW_HEIGHT, WINDOW_WIDTH},
     SetupPlugin,
 };
 use wheel::WheelPlugin;
@@ -29,6 +29,7 @@ const COLOR_BACKGROUND: Color = Color::rgb(0.29, 0.31, 0.41);
 
 fn main() {
     App::new()
+        .add_state::<AppStates>()
         .insert_resource(ClearColor(COLOR_BACKGROUND))
         .add_plugins(
             DefaultPlugins

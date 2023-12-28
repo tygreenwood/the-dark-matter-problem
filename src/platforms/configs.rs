@@ -1,3 +1,11 @@
+use bevy::prelude::*;
+
+pub const COLOR_PLATFORM: Color = Color::rgb(0.13, 0.13, 0.23);
+
+pub const FLOOR_THICKNESS: f32 = 10.0;
+
+pub const COLOR_FLOOR: Color = Color::rgb(0.45, 0.55, 0.66);
+
 pub const TRIANGULAR_PLATFORM_TALL_PATH: &str = "sprites/platforms/triangular/PlatformTall.png";
 pub const TRIANGULAR_PLATFORM_WIDE_PATH: &str = "sprites/platforms/triangular/PlatformWide.png";
 

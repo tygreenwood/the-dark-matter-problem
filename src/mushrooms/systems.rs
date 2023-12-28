@@ -1,17 +1,9 @@
-use bevy::{
-    ecs::{entity::Entity, query::With},
-    prelude::{default, AssetServer, Assets, Commands, Query, Res, ResMut, Transform, Vec2, Vec3},
-    sprite::{SpriteSheetBundle, TextureAtlas, TextureAtlasSprite},
-    time::{Time, Timer, TimerMode},
-};
-use bevy_rapier2d::{
-    dynamics::RigidBody,
-    geometry::{ActiveEvents, Collider, Sensor},
-    plugin::RapierContext,
-};
+use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 use crate::{
-    platforms::FLOOR_THICKNESS, player::components::Player, setup::configs::WINDOW_BOTTOM_Y,
+    platforms::configs::FLOOR_THICKNESS, player::components::Player,
+    setup::configs::WINDOW_BOTTOM_Y,
 };
 
 use super::{
@@ -85,5 +77,11 @@ pub fn check_mushroom_hop(
         if rapier_context.intersection_pair(player, mushroom) == Some(true) {
             println!("intersecting!!")
         }
+    }
+}
+
+pub fn cleanup(mut commands: Commands, query_mushrooms: Query<Entity, With<Mushroom>>) {
+    for entity in &query_mushrooms {
+        commands.entity(entity).despawn();
     }
 }
