@@ -11,8 +11,8 @@ opt-level = 3
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-bevy = { version = "0.12", features = [
+bevy = { version = "0.12.1", features = [
     "dynamic_linking"
-] } # Remove Before Release
+] } # Remove Features Before Release
 bevy_rapier2d = "0.23"
 rand = "0.8.5"

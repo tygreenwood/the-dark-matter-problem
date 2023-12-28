@@ -25,10 +25,7 @@ impl Plugin for SavesPlugin {
             .add_systems(Startup, load_scene_system)
             .add_systems(
                 Update,
-                (
-                    (save_scene_system, check_for_save).run_if(in_state(AppStates::Game)),
-                    load_save,
-                ),
+                (save_scene_system, check_for_save, load_save).run_if(in_state(AppStates::Game)),
             );
     }
 }

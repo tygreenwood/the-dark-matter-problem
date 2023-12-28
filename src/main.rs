@@ -6,6 +6,7 @@ use bevy_rapier2d::{prelude::*, render::RapierDebugRenderPlugin};
 
 mod background;
 mod camera;
+mod main_menu;
 mod mushrooms;
 mod platforms;
 mod player;
@@ -15,6 +16,7 @@ mod wheel;
 
 use background::BackgroundPlugin;
 use camera::CameraPlugin;
+use main_menu::MainMenuPlugin;
 use mushrooms::MushroomsPlugin;
 use platforms::PlatformsPlugin;
 use player::PlayerPlugin;
@@ -58,6 +60,7 @@ fn main() {
             BackgroundPlugin,
             MushroomsPlugin,
             WheelPlugin,
+            MainMenuPlugin,
         ))
         .run();
 }

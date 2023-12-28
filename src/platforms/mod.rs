@@ -12,6 +12,7 @@ pub struct PlatformsPlugin;
 
 impl Plugin for PlatformsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppStates::Game), setup_entities);
+        app.add_systems(OnEnter(AppStates::Game), setup_entities)
+            .add_systems(OnExit(AppStates::Game), cleanup);
     }
 }

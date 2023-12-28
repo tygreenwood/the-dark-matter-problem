@@ -9,6 +9,6 @@ pub const WINDOW_LEFT_X: f32 = WINDOW_WIDTH / -2.0;
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum AppStates {
     #[default]
-    //    MainMenu,
+    MainMenu,
     Game,
 }
