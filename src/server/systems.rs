@@ -26,14 +26,11 @@ pub fn add_netcode_network(app: &mut App) {
 
     let server = RenetServer::new(ConnectionConfig::default());
 
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    let public_ip = rt.block_on(public_ip::addr()).unwrap();
-    let public_addr = SocketAddr::new(public_ip, 42069);
-
-    println!("Running on address: {}", public_addr);
-
     let inbound_server_addr = SocketAddr::new(local_ip().unwrap(), 42069);
     let socket = UdpSocket::bind(inbound_server_addr).unwrap();
+
+    println!("Running on local address: {}", inbound_server_addr);
+
     let current_time: std::time::Duration = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap();
@@ -41,7 +38,7 @@ pub fn add_netcode_network(app: &mut App) {
         current_time,
         max_clients: 64,
         protocol_id: PROTOCOL_ID,
-        public_addresses: vec![public_addr],
+        public_addresses: vec![inbound_server_addr],
         authentication: ServerAuthentication::Unsecure,
     };
 

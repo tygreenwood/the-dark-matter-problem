@@ -20,9 +20,6 @@ impl Plugin for ServerPlugin {
 
         add_netcode_network(app);
 
-        app.add_systems(
-            Update,
-            server_update_system.run_if(in_state(AppStates::Game)),
-        );
+        app.add_systems(Update, server_update_system);
     }
 }

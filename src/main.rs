@@ -66,6 +66,7 @@ fn main() {
             WheelPlugin,
             MainMenuPlugin,
         ));
+
     #[cfg(feature = "server")]
     app.add_plugins(ServerPlugin);
 

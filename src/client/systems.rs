@@ -13,8 +13,9 @@ use std::{
 };
 
 use crate::{
-    client::components::CurrentClientId, player::components::ControlledPlayer,
-    setup::configs::PROTOCOL_ID,
+    client::components::CurrentClientId,
+    player::components::ControlledPlayer,
+    setup::configs::{AppStates, PROTOCOL_ID},
 };
 
 use super::components::{ClientChannel, Connected, PlayerTransform};
@@ -26,10 +27,11 @@ pub fn add_netcode_network(app: &mut App) {
 
     let client = RenetClient::new(ConnectionConfig::default());
 
-    let server_addr = "127.0.0.1:5000".parse().unwrap();
+    let server_addr = SocketAddr::new(local_ip().unwrap(), 0);
 
     let local_addr = SocketAddr::new(local_ip().unwrap(), 0);
     let socket = UdpSocket::bind(local_addr).unwrap();
+
     let current_time = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap();
@@ -55,7 +57,10 @@ pub fn add_netcode_network(app: &mut App) {
         }
     }
 
-    app.add_systems(Update, panic_on_error_system);
+    app.add_systems(
+        Update,
+        panic_on_error_system.run_if(in_state(AppStates::Game)),
+    );
 }
 
 pub fn client_send_input(
@@ -69,4 +74,29 @@ pub fn client_send_input(
     let input_message = bincode::serialize(&player_input).unwrap();
 
     client.send_message(ClientChannel::Input, input_message);
+}
+
+pub fn update_netcode_network(
+    client_id_res: Res<CurrentClientId>,
+    mut transport_res: ResMut<NetcodeClientTransport>,
+) {
+    let client_id = client_id_res.0;
+
+    let server_addr = SocketAddr::new(local_ip().unwrap(), 0);
+
+    let local_addr = SocketAddr::new(local_ip().unwrap(), 0);
+    let socket = UdpSocket::bind(local_addr).unwrap();
+
+    let current_time = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap();
+    let authentication = ClientAuthentication::Unsecure {
+        client_id,
+        protocol_id: PROTOCOL_ID,
+        server_addr,
+        user_data: None,
+    };
+
+    let transport = NetcodeClientTransport::new(current_time, authentication, socket).unwrap();
+    *transport_res = transport;
 }
