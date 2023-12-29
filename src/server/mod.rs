@@ -1,14 +1,12 @@
 use bevy::prelude::*;
 use bevy_renet::RenetServerPlugin;
 
-use crate::setup::configs::AppStates;
-
 use self::{
     components::ServerLobby,
     systems::{add_netcode_network, server_update_system},
 };
 
-mod components;
+pub mod components;
 mod systems;
 
 pub struct ServerPlugin;

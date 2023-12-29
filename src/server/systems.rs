@@ -16,7 +16,7 @@ use crate::{
         components::{AnimationIndices, AnimationTimer, Player},
         configs::PLAYER_RUNNING_ANIMATION_PATH,
     },
-    setup::configs::{PROTOCOL_ID, WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
+    setup::configs::{connection_config, PROTOCOL_ID, WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
 };
 
 use super::components::{ServerChannel, ServerLobby, ServerMessages};
@@ -24,7 +24,7 @@ use super::components::{ServerChannel, ServerLobby, ServerMessages};
 pub fn add_netcode_network(app: &mut App) {
     app.add_plugins(NetcodeServerPlugin);
 
-    let server = RenetServer::new(ConnectionConfig::default());
+    let server = RenetServer::new(connection_config());
 
     let inbound_server_addr = SocketAddr::new(local_ip().unwrap(), 42069);
     let socket = UdpSocket::bind(inbound_server_addr).unwrap();

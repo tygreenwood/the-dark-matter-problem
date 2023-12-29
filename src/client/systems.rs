@@ -15,7 +15,7 @@ use std::{
 use crate::{
     client::components::CurrentClientId,
     player::components::ControlledPlayer,
-    setup::configs::{AppStates, PROTOCOL_ID},
+    setup::configs::{connection_config, AppStates, PROTOCOL_ID},
 };
 
 use super::components::{ClientChannel, Connected, PlayerTransform};
@@ -25,7 +25,7 @@ pub fn add_netcode_network(app: &mut App) {
 
     app.configure_sets(Update, Connected.run_if(client_connected()));
 
-    let client = RenetClient::new(ConnectionConfig::default());
+    let client = RenetClient::new(connection_config());
 
     let server_addr = SocketAddr::new(local_ip().unwrap(), 0);
 
