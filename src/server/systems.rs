@@ -11,7 +11,7 @@ use std::{
 };
 
 use crate::{
-    client::components::{ClientChannel, PlayerTransform},
+    client::components::{ClientChannel, PlayerMessage},
     player::{
         components::{AnimationIndices, ControlledPlayer, Player},
         configs::PLAYER_RUNNING_ANIMATION_PATH,
@@ -141,17 +141,24 @@ pub fn server_update_system(
 
     for client_id in server.clients_id() {
         while let Some(message) = server.receive_message(client_id, ClientChannel::Input) {
-            let input: PlayerTransform = bincode::deserialize(&message).unwrap();
+            let input: PlayerMessage = bincode::deserialize(&message).unwrap();
             if let Some(player_entity) = lobby.players.get(&client_id) {
-                commands.entity(*player_entity).insert(Transform {
-                    translation: Vec3::new(
-                        input.translation[0],
-                        input.translation[1],
-                        input.translation[2],
-                    ),
-                    scale: Vec3::new(5., 5., 1.),
-                    ..default()
-                });
+                commands
+                    .entity(*player_entity)
+                    .insert(Transform {
+                        translation: Vec3::new(
+                            input.translation[0],
+                            input.translation[1],
+                            input.translation[2],
+                        ),
+                        scale: Vec3::new(5., 5., 1.),
+                        ..default()
+                    })
+                    .insert(TextureAtlasSprite {
+                        index: input.index,
+                        flip_x: input.flip,
+                        ..default()
+                    });
             }
         }
     }
@@ -159,14 +166,19 @@ pub fn server_update_system(
 
 pub fn server_network_sync(
     mut server: ResMut<RenetServer>,
-    query_players: Query<(Entity, &GlobalTransform), Or<(With<Player>, With<ControlledPlayer>)>>,
+    query_players: Query<
+        (Entity, &GlobalTransform, &TextureAtlasSprite),
+        Or<(With<Player>, With<ControlledPlayer>)>,
+    >,
 ) {
     let mut networked_entities = NetworkedEntities::default();
-    for (entity, transform) in &query_players {
+    for (entity, transform, texture_atlas) in &query_players {
         networked_entities.entities.push(entity);
         networked_entities
             .translations
             .push(transform.translation().into());
+        networked_entities.flip.push(texture_atlas.flip_x);
+        networked_entities.frame.push(texture_atlas.index);
     }
 
     let sync_message = bincode::serialize(&networked_entities).unwrap();

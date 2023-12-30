@@ -18,12 +18,14 @@ mod wheel;
 
 use background::BackgroundPlugin;
 use camera::CameraPlugin;
+#[allow(unused_imports)]
 use client::ClientPlugin;
 use main_menu::MainMenuPlugin;
 use mushrooms::MushroomsPlugin;
 use platforms::PlatformsPlugin;
 use player::PlayerPlugin;
 use saves::SavesPlugin;
+#[allow(unused_imports)]
 use server::ServerPlugin;
 use setup::{
     configs::{AppStates, WINDOW_HEIGHT, WINDOW_WIDTH},

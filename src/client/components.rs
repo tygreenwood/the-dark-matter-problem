@@ -4,8 +4,10 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, time::Duration};
 
 #[derive(Component, Serialize, Deserialize)]
-pub struct PlayerTransform {
+pub struct PlayerMessage {
     pub translation: [f32; 3],
+    pub flip: bool,
+    pub index: usize,
 }
 
 #[derive(Default, Resource)]

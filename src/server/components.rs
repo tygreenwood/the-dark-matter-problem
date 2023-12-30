@@ -58,4 +58,6 @@ pub enum ServerMessages {
 pub struct NetworkedEntities {
     pub entities: Vec<Entity>,
     pub translations: Vec<[f32; 3]>,
+    pub flip: Vec<bool>,
+    pub frame: Vec<usize>,
 }

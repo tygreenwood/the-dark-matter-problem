@@ -24,7 +24,7 @@ use crate::{
 
 use super::{
     components::{
-        ClientChannel, ClientLobby, Connected, NetworkMapping, PlayerInfo, PlayerTransform,
+        ClientChannel, ClientLobby, Connected, NetworkMapping, PlayerInfo, PlayerMessage,
     },
     configs::SERVER_ADDRESS,
 };
@@ -74,11 +74,13 @@ pub fn add_netcode_network(app: &mut App) {
 
 pub fn client_send_input(
     mut client: ResMut<RenetClient>,
-    query_player_transform: Query<&GlobalTransform, With<ControlledPlayer>>,
+    query_player_transform: Query<(&GlobalTransform, &TextureAtlasSprite), With<ControlledPlayer>>,
 ) {
-    let player = query_player_transform.single();
-    let player_input = PlayerTransform {
+    let (player, tex_atlas) = query_player_transform.single();
+    let player_input = PlayerMessage {
         translation: player.translation().into(),
+        flip: tex_atlas.flip_x,
+        index: tex_atlas.index,
     };
     let input_message = bincode::serialize(&player_input).unwrap();
 
@@ -195,7 +197,14 @@ pub fn client_sync_players(
                     ..default()
                 };
 
-                commands.entity(*entity).insert(transform);
+                commands
+                    .entity(*entity)
+                    .insert(transform)
+                    .insert(TextureAtlasSprite {
+                        index: networked_entities.frame[i],
+                        flip_x: networked_entities.flip[i],
+                        ..default()
+                    });
             }
         }
     }
