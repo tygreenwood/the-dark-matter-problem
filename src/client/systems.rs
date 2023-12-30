@@ -22,8 +22,11 @@ use crate::{
     setup::configs::{connection_config, AppStates, PROTOCOL_ID},
 };
 
-use super::components::{
-    ClientChannel, ClientLobby, Connected, NetworkMapping, PlayerInfo, PlayerTransform,
+use super::{
+    components::{
+        ClientChannel, ClientLobby, Connected, NetworkMapping, PlayerInfo, PlayerTransform,
+    },
+    configs::SERVER_ADDRESS,
 };
 
 pub fn add_netcode_network(app: &mut App) {
@@ -88,7 +91,7 @@ pub fn update_netcode_network(
 ) {
     let client_id = client_id_res.0;
 
-    let server_addr = SocketAddr::new("192.168.7.215".parse().unwrap(), 42069);
+    let server_addr = SocketAddr::new(SERVER_ADDRESS.parse().unwrap(), 42069);
 
     let local_addr = SocketAddr::new(local_ip().unwrap(), 0);
     let socket = UdpSocket::bind(local_addr).unwrap();

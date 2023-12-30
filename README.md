@@ -54,6 +54,8 @@ git branch my-branch-name
     git clone <paste-segment-from-github>
     ```
 1. Type `cargo run` in the command line to run the project
+1. To run a server that can be connected to, type `cargo run --features server`. The IP that others can connect to on the same network will be printed to the command line.
+1. To connect to a server on the same network, enter the IP address in SERVER_ADDRESS found in `client/configs.rs`. Type `cargo run --features client`.
 
 ### Useful VSCode Extensions
 
