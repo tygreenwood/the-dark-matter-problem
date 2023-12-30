@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_renet::renet::{
     transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig},
-    RenetServer, ServerEvent,
+    ClientId, RenetServer, ServerEvent,
 };
 use bevy_renet::transport::NetcodeServerPlugin;
 use local_ip_address::local_ip;
@@ -55,6 +55,7 @@ pub fn server_update_system(
     mut lobby: ResMut<ServerLobby>,
     mut server: ResMut<RenetServer>,
     players: Query<(Entity, &Player, &Transform)>,
+    server_player: Query<(Entity, &GlobalTransform), With<ControlledPlayer>>,
 ) {
     for event in server_events.read() {
         match event {
@@ -66,6 +67,17 @@ pub fn server_update_system(
                     let translation: [f32; 3] = transform.translation.into();
                     let message = bincode::serialize(&ServerMessages::PlayerCreate {
                         id: player.id,
+                        entity,
+                        translation,
+                    })
+                    .unwrap();
+                    server.send_message(*client_id, ServerChannel::ServerMessages, message);
+                }
+
+                if let Ok((entity, transform)) = server_player.get_single() {
+                    let translation: [f32; 3] = transform.translation().into();
+                    let message = bincode::serialize(&ServerMessages::PlayerCreate {
+                        id: ClientId::from_raw(0),
                         entity,
                         translation,
                     })
