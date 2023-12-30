@@ -9,17 +9,17 @@ pub struct PlayerTransform {
 }
 
 #[derive(Default, Resource)]
-pub struct NetworkMapping(HashMap<Entity, Entity>);
+pub struct NetworkMapping(pub HashMap<Entity, Entity>);
 
 #[derive(Debug)]
 pub struct PlayerInfo {
-    client_entity: Entity,
-    server_entity: Entity,
+    pub client_entity: Entity,
+    pub server_entity: Entity,
 }
 
 #[derive(Debug, Default, Resource)]
 pub struct ClientLobby {
-    players: HashMap<ClientId, PlayerInfo>,
+    pub players: HashMap<ClientId, PlayerInfo>,
 }
 
 #[derive(Debug, Resource)]

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_renet::renet::{
     transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig},
-    ConnectionConfig, RenetServer, ServerEvent,
+    RenetServer, ServerEvent,
 };
 use bevy_renet::transport::NetcodeServerPlugin;
 use local_ip_address::local_ip;
@@ -13,13 +13,13 @@ use std::{
 use crate::{
     client::components::{ClientChannel, PlayerTransform},
     player::{
-        components::{AnimationIndices, AnimationTimer, Player},
+        components::{AnimationIndices, ControlledPlayer, Player},
         configs::PLAYER_RUNNING_ANIMATION_PATH,
     },
     setup::configs::{connection_config, PROTOCOL_ID, WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
 };
 
-use super::components::{ServerChannel, ServerLobby, ServerMessages};
+use super::components::{NetworkedEntities, ServerChannel, ServerLobby, ServerMessages};
 
 pub fn add_netcode_network(app: &mut App) {
     app.add_plugins(NetcodeServerPlugin);
@@ -62,7 +62,7 @@ pub fn server_update_system(
                 println!("Player {} connected.", client_id);
 
                 // Initialize other players for this new client
-                for (entity, player, transform) in players.iter() {
+                for (entity, player, transform) in &players {
                     let translation: [f32; 3] = transform.translation.into();
                     let message = bincode::serialize(&ServerMessages::PlayerCreate {
                         id: player.id,
@@ -100,9 +100,10 @@ pub fn server_update_system(
                         },
                         Player { id: *client_id },
                         player_animation_indices,
-                        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
                     ))
                     .id();
+
+                lobby.players.insert(*client_id, player_entity);
 
                 let translation: [f32; 3] = transform.translation.into();
                 let message = bincode::serialize(&ServerMessages::PlayerCreate {
@@ -142,4 +143,20 @@ pub fn server_update_system(
             }
         }
     }
+}
+
+pub fn server_network_sync(
+    mut server: ResMut<RenetServer>,
+    query_players: Query<(Entity, &GlobalTransform), Or<(With<Player>, With<ControlledPlayer>)>>,
+) {
+    let mut networked_entities = NetworkedEntities::default();
+    for (entity, transform) in &query_players {
+        networked_entities.entities.push(entity);
+        networked_entities
+            .translations
+            .push(transform.translation().into());
+    }
+
+    let sync_message = bincode::serialize(&networked_entities).unwrap();
+    server.broadcast_message(ServerChannel::NetworkedEntities, sync_message);
 }

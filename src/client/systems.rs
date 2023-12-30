@@ -3,7 +3,7 @@ use bevy_renet::{
     client_connected,
     renet::{
         transport::{ClientAuthentication, NetcodeClientTransport, NetcodeTransportError},
-        ConnectionConfig, RenetClient,
+        RenetClient,
     },
 };
 use local_ip_address::local_ip;
@@ -14,11 +14,17 @@ use std::{
 
 use crate::{
     client::components::CurrentClientId,
-    player::components::ControlledPlayer,
+    player::{
+        components::{AnimationIndices, ControlledPlayer, Player},
+        configs::PLAYER_RUNNING_ANIMATION_PATH,
+    },
+    server::components::{NetworkedEntities, ServerChannel, ServerMessages},
     setup::configs::{connection_config, AppStates, PROTOCOL_ID},
 };
 
-use super::components::{ClientChannel, Connected, PlayerTransform};
+use super::components::{
+    ClientChannel, ClientLobby, Connected, NetworkMapping, PlayerInfo, PlayerTransform,
+};
 
 pub fn add_netcode_network(app: &mut App) {
     app.add_plugins(bevy_renet::transport::NetcodeClientPlugin);
@@ -99,4 +105,94 @@ pub fn update_netcode_network(
 
     let transport = NetcodeClientTransport::new(current_time, authentication, socket).unwrap();
     *transport_res = transport;
+}
+
+pub fn client_sync_players(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut client: ResMut<RenetClient>,
+    client_id_res: Res<CurrentClientId>,
+    mut lobby: ResMut<ClientLobby>,
+    mut network_mapping: ResMut<NetworkMapping>,
+) {
+    let client_id = client_id_res.0;
+
+    while let Some(message) = client.receive_message(ServerChannel::ServerMessages) {
+        let server_message: ServerMessages = bincode::deserialize(&message).unwrap();
+        match server_message {
+            ServerMessages::PlayerCreate {
+                entity,
+                id,
+                translation,
+            } => {
+                if id.raw() != client_id {
+                    let transform = Transform {
+                        translation: Vec3::new(translation[0], translation[1], 0.0),
+                        scale: Vec3::new(5., 5., 1.),
+                        ..default()
+                    };
+                    let player_texture_handle = asset_server.load(PLAYER_RUNNING_ANIMATION_PATH);
+                    let player_texture_atlas = TextureAtlas::from_grid(
+                        player_texture_handle,
+                        Vec2::new(19.0, 32.0),
+                        7,
+                        1,
+                        None,
+                        None,
+                    );
+                    let player_texture_atlas_handle = texture_atlases.add(player_texture_atlas);
+                    let player_animation_indices = AnimationIndices { first: 0, last: 6 };
+
+                    let player_entity = commands
+                        .spawn((
+                            SpriteSheetBundle {
+                                texture_atlas: player_texture_atlas_handle,
+                                transform,
+                                ..default()
+                            },
+                            Player { id },
+                            player_animation_indices,
+                        ))
+                        .id();
+
+                    let player_info = PlayerInfo {
+                        server_entity: entity,
+                        client_entity: player_entity,
+                    };
+
+                    lobby.players.insert(id, player_info);
+                    network_mapping.0.insert(entity, player_entity);
+                }
+            }
+            ServerMessages::PlayerRemove { id } => {
+                if let Some(PlayerInfo {
+                    server_entity,
+                    client_entity,
+                }) = lobby.players.remove(&id)
+                {
+                    commands.entity(client_entity).despawn();
+                    network_mapping.0.remove(&server_entity);
+                }
+            }
+        }
+    }
+
+    while let Some(message) = client.receive_message(ServerChannel::NetworkedEntities) {
+        let networked_entities: NetworkedEntities = bincode::deserialize(&message).unwrap();
+
+        for i in 0..networked_entities.entities.len() {
+            if let Some(entity) = network_mapping.0.get(&networked_entities.entities[i]) {
+                let translation: Vec3 = networked_entities.translations[i].into();
+
+                let transform = Transform {
+                    translation,
+                    scale: Vec3::new(5., 5., 1.),
+                    ..default()
+                };
+
+                commands.entity(*entity).insert(transform);
+            }
+        }
+    }
 }

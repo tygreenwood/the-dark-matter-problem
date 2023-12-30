@@ -3,7 +3,7 @@ use bevy_renet::RenetServerPlugin;
 
 use self::{
     components::ServerLobby,
-    systems::{add_netcode_network, server_update_system},
+    systems::{add_netcode_network, server_network_sync, server_update_system},
 };
 
 pub mod components;
@@ -18,6 +18,6 @@ impl Plugin for ServerPlugin {
 
         add_netcode_network(app);
 
-        app.add_systems(Update, server_update_system);
+        app.add_systems(Update, (server_update_system, server_network_sync));
     }
 }
