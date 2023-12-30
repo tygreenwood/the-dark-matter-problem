@@ -88,7 +88,7 @@ pub fn update_netcode_network(
 ) {
     let client_id = client_id_res.0;
 
-    let server_addr = SocketAddr::new(local_ip().unwrap(), 0);
+    let server_addr = SocketAddr::new("192.168.7.215".parse().unwrap(), 42069);
 
     let local_addr = SocketAddr::new(local_ip().unwrap(), 0);
     let socket = UdpSocket::bind(local_addr).unwrap();
@@ -126,6 +126,7 @@ pub fn client_sync_players(
                 id,
                 translation,
             } => {
+                println!("Player {} connected.", id);
                 if id.raw() != client_id {
                     let transform = Transform {
                         translation: Vec3::new(translation[0], translation[1], 0.0),
