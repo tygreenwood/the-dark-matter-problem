@@ -5,7 +5,9 @@ use crate::setup::configs::AppStates;
 
 use self::{
     components::{ClientLobby, Connected, NetworkMapping},
-    systems::{add_netcode_network, client_send_input, update_netcode_network},
+    systems::{
+        add_netcode_network, client_send_input, client_sync_players, update_netcode_network,
+    },
 };
 
 pub mod components;
@@ -23,9 +25,7 @@ impl Plugin for ClientPlugin {
             .insert_resource(NetworkMapping::default())
             .add_systems(
                 Update,
-                (client_send_input)
-                    .in_set(Connected)
-                    .run_if(in_state(AppStates::Game)),
+                (client_send_input, client_sync_players).in_set(Connected),
             )
             .add_systems(OnEnter(AppStates::Game), update_netcode_network);
     }
