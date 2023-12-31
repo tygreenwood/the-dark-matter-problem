@@ -46,7 +46,7 @@ fn main() {
                         title: "The Dark Matter Problem".to_string(),
                         resizable: true,
                         resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HEIGHT),
-                        mode: WindowMode::Windowed,
+                        mode: WindowMode::BorderlessFullscreen,
                         ..default()
                     }),
                     ..default()

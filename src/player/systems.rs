@@ -8,14 +8,11 @@ use crate::{
 
 use super::{
     components::{AnimationIndices, AnimationTimer, Cat, ControlledPlayer, Jump},
-    configs::{CAT_ANIMATION_PATH, PLAYER_RUNNING_ANIMATION_PATH},
+    configs::{
+        CAT_ANIMATION_PATH, MAX_JUMP_HEIGHT, PLAYER_RUNNING_ANIMATION_PATH, PLAYER_VELOCITY_X,
+        PLAYER_VELOCITY_Y,
+    },
 };
-
-const PLAYER_VELOCITY_X: f32 = 400.0;
-
-const PLAYER_VELOCITY_Y: f32 = 850.0;
-
-const MAX_JUMP_HEIGHT: f32 = 230.0;
 
 pub fn setup_player(
     mut commands: Commands,
@@ -94,7 +91,7 @@ pub fn movement(
     let mut player_flip = query_player_flip.single_mut();
     let (mut cat_flip, mut cat_position) = query_cat_flip.single_mut();
 
-    if input.pressed(KeyCode::Right) {
+    if right(&input) {
         movement += time.delta_seconds() * PLAYER_VELOCITY_X;
         if player_flip.flip_x {
             player_flip.flip_x = false;
@@ -103,7 +100,7 @@ pub fn movement(
         }
     }
 
-    if input.pressed(KeyCode::Left) {
+    if left(&input) {
         movement += time.delta_seconds() * PLAYER_VELOCITY_X * -1.0;
         if !player_flip.flip_x {
             player_flip.flip_x = true;
@@ -135,7 +132,7 @@ pub fn jump(
 
     let (player, output) = query.single();
 
-    if input.pressed(KeyCode::Up) && output.grounded {
+    if up(&input) && output.grounded {
         commands.entity(player).insert(Jump(0.0));
     }
 }
@@ -213,8 +210,7 @@ pub fn animate_sprite(
         timer.tick(time.delta());
         if timer.just_finished() {
             sprite.index = if sprite.index != indices.last
-                && (sprite.index != indices.first
-                    || (input.pressed(KeyCode::Left) || input.pressed(KeyCode::Right)))
+                && (sprite.index != indices.first || (left(&input) || right(&input)))
             {
                 sprite.index + 1
             } else {
@@ -227,8 +223,7 @@ pub fn animate_sprite(
         timer.tick(time.delta());
         if timer.just_finished() {
             sprite.index = if sprite.index != indices.last
-                && (sprite.index != indices.first
-                    || (input.pressed(KeyCode::Left) || input.pressed(KeyCode::Right)))
+                && (sprite.index != indices.first || (left(&input) || right(&input)))
             {
                 sprite.index + 1
             } else {
@@ -236,6 +231,18 @@ pub fn animate_sprite(
             };
         }
     }
+}
+
+fn left(input: &Res<Input<KeyCode>>) -> bool {
+    input.pressed(KeyCode::Left) || input.pressed(KeyCode::A)
+}
+
+fn right(input: &Res<Input<KeyCode>>) -> bool {
+    input.pressed(KeyCode::Right) || input.pressed(KeyCode::D)
+}
+
+fn up(input: &Res<Input<KeyCode>>) -> bool {
+    input.pressed(KeyCode::Up) || input.pressed(KeyCode::W)
 }
 
 pub fn cleanup(
