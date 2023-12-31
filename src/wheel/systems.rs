@@ -3,8 +3,10 @@ use rand::Rng;
 use std::f32::consts::PI;
 
 use crate::{
-    platforms::configs::FLOOR_THICKNESS, player::components::ControlledPlayer,
-    saves::resources::WheelSaveInformation, setup::configs::WINDOW_BOTTOM_Y,
+    platforms::configs::FLOOR_THICKNESS,
+    player::components::{ControlledPlayer, MyGamepad},
+    saves::resources::WheelSaveInformation,
+    setup::configs::WINDOW_BOTTOM_Y,
 };
 
 use super::{
@@ -44,15 +46,25 @@ pub fn spin_wheel(
     query_player: Query<&GlobalTransform, With<ControlledPlayer>>,
     mut query_wheel: Query<(&GlobalTransform, &mut Wheel)>,
     input: Res<Input<KeyCode>>,
+    buttons: Res<Input<GamepadButton>>,
+    my_gamepad: Option<Res<MyGamepad>>,
 ) {
     let mut rng = rand::thread_rng();
     let player = query_player.single();
     let (wheel, mut rot) = query_wheel.single_mut();
 
+    let interact_controller = my_gamepad.map_or(false, |gp| {
+        let interact_button = GamepadButton {
+            gamepad: gp.0,
+            button_type: GamepadButtonType::West,
+        };
+        buttons.pressed(interact_button)
+    });
+
     if (player.translation().x - wheel.translation().x).powi(2)
         + (player.translation().y - wheel.translation().y).powi(2)
         < 40000.
-        && input.pressed(KeyCode::E)
+        && (input.pressed(KeyCode::E) || interact_controller)
         && rot.spin == 0.
     {
         rot.spin = rng.gen_range(0.0..360.) + 1080.;

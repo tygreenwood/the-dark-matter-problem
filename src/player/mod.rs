@@ -15,7 +15,10 @@ impl Plugin for PlayerPlugin {
         app.add_systems(OnEnter(AppStates::Game), setup_player)
             .add_systems(
                 Update,
-                (movement, jump, fall, rise, animate_sprite).run_if(in_state(AppStates::Game)),
+                (
+                    (movement, jump, fall, rise, animate_sprite).run_if(in_state(AppStates::Game)),
+                    gamepad_connections,
+                ),
             )
             .add_systems(OnExit(AppStates::Game), cleanup);
     }

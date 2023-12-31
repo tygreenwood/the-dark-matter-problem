@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    input::gamepad::{GamepadConnection, GamepadEvent},
+    prelude::*,
+};
 use bevy_rapier2d::prelude::*;
 
 use crate::{
@@ -7,7 +10,7 @@ use crate::{
 };
 
 use super::{
-    components::{AnimationIndices, AnimationTimer, Cat, ControlledPlayer, Jump},
+    components::{AnimationIndices, AnimationTimer, Cat, ControlledPlayer, Jump, MyGamepad},
     configs::{
         CAT_ANIMATION_PATH, MAX_JUMP_HEIGHT, PLAYER_RUNNING_ANIMATION_PATH, PLAYER_VELOCITY_X,
         PLAYER_VELOCITY_Y,
@@ -73,8 +76,52 @@ pub fn setup_player(
         });
 }
 
+pub fn gamepad_connections(
+    mut commands: Commands,
+    my_gamepad: Option<Res<MyGamepad>>,
+    mut gamepad_evr: EventReader<GamepadEvent>,
+) {
+    for ev in gamepad_evr.read() {
+        match &ev {
+            GamepadEvent::Connection(connection) => {
+                match &connection.connection {
+                    GamepadConnection::Connected(info) => {
+                        println!(
+                            "New gamepad connected with ID: {:?}, name: {}",
+                            connection.gamepad.id, info.name
+                        );
+
+                        // if we don't have any gamepad yet, use this one
+                        if my_gamepad.is_none() {
+                            commands.insert_resource(MyGamepad(connection.gamepad));
+                        }
+                    }
+                    GamepadConnection::Disconnected => {
+                        println!(
+                            "Lost gamepad connection with ID: {:?}",
+                            connection.gamepad.id
+                        );
+
+                        // if it's the one we previously associated with the player,
+                        // disassociate it:
+                        if let Some(MyGamepad(old_id)) = my_gamepad.as_deref() {
+                            if old_id.id == connection.gamepad.id {
+                                commands.remove_resource::<MyGamepad>();
+                            }
+                        }
+                    }
+                }
+            }
+            // other events are irrelevant
+            _ => {}
+        }
+    }
+}
+
 pub fn movement(
     input: Res<Input<KeyCode>>,
+    axes: Res<Axis<GamepadAxis>>,
+    my_gamepad: Option<Res<MyGamepad>>,
     time: Res<Time>,
     mut query: Query<(&mut KinematicCharacterController, &GlobalTransform)>,
     mut query_player_flip: Query<&mut TextureAtlasSprite, (With<ControlledPlayer>, Without<Cat>)>,
@@ -84,6 +131,14 @@ pub fn movement(
     >,
     mut pos_save: ResMut<PositionSaveInformation>,
 ) {
+    let joystick_move = my_gamepad.map_or(0., |gp| {
+        let axis_lx = GamepadAxis {
+            gamepad: gp.0,
+            axis_type: GamepadAxisType::LeftStickX,
+        };
+        axes.get(axis_lx).unwrap_or(0.)
+    });
+
     let (mut player, player_pos) = query.single_mut();
 
     let mut movement = 0.0;
@@ -91,7 +146,7 @@ pub fn movement(
     let mut player_flip = query_player_flip.single_mut();
     let (mut cat_flip, mut cat_position) = query_cat_flip.single_mut();
 
-    if right(&input) {
+    if right(&input) || joystick_move > 0.2 {
         movement += time.delta_seconds() * PLAYER_VELOCITY_X;
         if player_flip.flip_x {
             player_flip.flip_x = false;
@@ -100,7 +155,7 @@ pub fn movement(
         }
     }
 
-    if left(&input) {
+    if left(&input) || joystick_move < -0.2 {
         movement += time.delta_seconds() * PLAYER_VELOCITY_X * -1.0;
         if !player_flip.flip_x {
             player_flip.flip_x = true;
@@ -120,6 +175,8 @@ pub fn movement(
 
 pub fn jump(
     input: Res<Input<KeyCode>>,
+    buttons: Res<Input<GamepadButton>>,
+    my_gamepad: Option<Res<MyGamepad>>,
     mut commands: Commands,
     query: Query<
         (Entity, &KinematicCharacterControllerOutput),
@@ -130,9 +187,17 @@ pub fn jump(
         return;
     }
 
+    let up_controller = my_gamepad.map_or(false, |gp| {
+        let jump_button = GamepadButton {
+            gamepad: gp.0,
+            button_type: GamepadButtonType::South,
+        };
+        buttons.pressed(jump_button)
+    });
+
     let (player, output) = query.single();
 
-    if up(&input) && output.grounded {
+    if (up(&input) || up_controller) && output.grounded {
         commands.entity(player).insert(Jump(0.0));
     }
 }
@@ -205,12 +270,30 @@ pub fn animate_sprite(
         (With<Cat>, Without<ControlledPlayer>),
     >,
     input: Res<Input<KeyCode>>,
+    axes: Res<Axis<GamepadAxis>>,
+    my_gamepad: Option<Res<MyGamepad>>,
 ) {
+    let joystick_move = if let Some(gp) = my_gamepad {
+        let axis_lx = GamepadAxis {
+            gamepad: gp.0,
+            axis_type: GamepadAxisType::LeftStickX,
+        };
+        if let Some(x) = axes.get(axis_lx) {
+            x
+        } else {
+            0.
+        }
+    } else {
+        0.
+    };
+
     for (indices, mut timer, mut sprite) in &mut query_player {
         timer.tick(time.delta());
         if timer.just_finished() {
             sprite.index = if sprite.index != indices.last
-                && (sprite.index != indices.first || (left(&input) || right(&input)))
+                && (sprite.index != indices.first
+                    || (left(&input) || right(&input))
+                    || joystick_move.abs() > 0.2)
             {
                 sprite.index + 1
             } else {
@@ -223,7 +306,9 @@ pub fn animate_sprite(
         timer.tick(time.delta());
         if timer.just_finished() {
             sprite.index = if sprite.index != indices.last
-                && (sprite.index != indices.first || (left(&input) || right(&input)))
+                && (sprite.index != indices.first
+                    || (left(&input) || right(&input))
+                    || joystick_move.abs() > 0.2)
             {
                 sprite.index + 1
             } else {

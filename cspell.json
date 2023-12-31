@@ -10,6 +10,7 @@
         "consts",
         "despawn",
         "Fullscreen",
+        "Gamepad",
         "hellscape",
         "Netcode",
         "polyline",
