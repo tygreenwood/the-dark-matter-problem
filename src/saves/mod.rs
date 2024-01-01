@@ -19,10 +19,10 @@ impl Plugin for SavesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PositionSaveInformation>()
             .init_resource::<WheelSaveInformation>()
-            .init_resource::<SaveGame>()
+            .add_event::<SaveGame>()
             .register_type::<WheelSaveComponent>()
             .register_type::<PositionSaveComponent>()
-            .add_systems(Startup, load_scene_system)
+            .add_systems(OnEnter(AppStates::LoadSave), load_scene_system)
             .add_systems(
                 Update,
                 (save_scene_system, check_for_save, load_save).run_if(in_state(AppStates::Game)),

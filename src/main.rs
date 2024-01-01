@@ -4,6 +4,7 @@ use bevy::{
 };
 use bevy_rapier2d::{prelude::*, render::RapierDebugRenderPlugin};
 
+mod animations;
 mod background;
 mod camera;
 mod client;

@@ -1,4 +1,7 @@
-use bevy::{ecs::system::Resource, math::Quat};
+use bevy::{
+    ecs::{event::Event, system::Resource},
+    math::Quat,
+};
 
 #[derive(Resource, Default)]
 pub struct PositionSaveInformation {
@@ -11,13 +14,5 @@ pub struct WheelSaveInformation {
     pub rot: Quat,
 }
 
-#[derive(Resource)]
-pub struct SaveGame {
-    pub save: bool,
-}
-
-impl Default for SaveGame {
-    fn default() -> SaveGame {
-        SaveGame { save: false }
-    }
-}
+#[derive(Event, Default)]
+pub struct SaveGame;

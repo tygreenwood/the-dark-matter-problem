@@ -3,7 +3,7 @@ use bevy::{app::AppExit, prelude::*};
 use crate::setup::configs::AppStates;
 
 use super::{
-    components::{MainMenu, PlayButton, QuitButton},
+    components::{LoadSaveButton, MainMenu, PlayButton, QuitButton},
     configs::{
         BUTTON_STYLE, HOVERED_BUTTON_COLOR, MAIN_MENU_STYLE, NORMAL_BUTTON_COLOR,
         PRESSED_BUTTON_COLOR,
@@ -34,6 +34,33 @@ pub fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                         text: Text {
                             sections: vec![TextSection::new(
                                 "Play",
+                                TextStyle {
+                                    font: asset_server.load("fonts/summer_story.otf"),
+                                    font_size: 32.0,
+                                    color: Color::WHITE,
+                                },
+                            )],
+                            alignment: TextAlignment::Center,
+                            ..default()
+                        },
+                        ..default()
+                    });
+                });
+
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: BUTTON_STYLE,
+                        background_color: NORMAL_BUTTON_COLOR.into(),
+                        ..default()
+                    },
+                    LoadSaveButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle {
+                        text: Text {
+                            sections: vec![TextSection::new(
+                                "Load Save",
                                 TextStyle {
                                     font: asset_server.load("fonts/summer_story.otf"),
                                     font_size: 32.0,
@@ -88,6 +115,29 @@ pub fn interact_with_play_button(
             Interaction::Pressed => {
                 *background_color = PRESSED_BUTTON_COLOR.into();
                 app_state_next_state.set(AppStates::Game);
+            }
+            Interaction::Hovered => {
+                *background_color = HOVERED_BUTTON_COLOR.into();
+            }
+            Interaction::None => {
+                *background_color = NORMAL_BUTTON_COLOR.into();
+            }
+        }
+    }
+}
+
+pub fn interact_with_load_button(
+    mut button_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<LoadSaveButton>),
+    >,
+    mut app_state_next_state: ResMut<NextState<AppStates>>,
+) {
+    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+        match *interaction {
+            Interaction::Pressed => {
+                *background_color = PRESSED_BUTTON_COLOR.into();
+                app_state_next_state.set(AppStates::LoadSave);
             }
             Interaction::Hovered => {
                 *background_color = HOVERED_BUTTON_COLOR.into();

@@ -15,6 +15,7 @@ pub const WINDOW_LEFT_X: f32 = WINDOW_WIDTH / -2.0;
 pub enum AppStates {
     #[default]
     MainMenu,
+    LoadSave,
     Game,
 }
 

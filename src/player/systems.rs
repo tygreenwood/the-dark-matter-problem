@@ -5,12 +5,13 @@ use bevy::{
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    animations::components::{AnimationIndices, AnimationTimer},
     saves::resources::PositionSaveInformation,
     setup::configs::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X},
 };
 
 use super::{
-    components::{AnimationIndices, AnimationTimer, Cat, ControlledPlayer, Jump, MyGamepad},
+    components::{Cat, ControlledPlayer, Jump, MyGamepad},
     configs::{
         CAT_ANIMATION_PATH, MAX_JUMP_HEIGHT, PLAYER_RUNNING_ANIMATION_PATH, PLAYER_VELOCITY_X,
         PLAYER_VELOCITY_Y,

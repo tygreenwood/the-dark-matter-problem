@@ -13,9 +13,10 @@ use std::{
 };
 
 use crate::{
+    animations::components::AnimationIndices,
     client::components::CurrentClientId,
     player::{
-        components::{AnimationIndices, ControlledPlayer, Player},
+        components::{ControlledPlayer, Player},
         configs::PLAYER_RUNNING_ANIMATION_PATH,
     },
     server::components::{NetworkedEntities, ServerChannel, ServerMessages},

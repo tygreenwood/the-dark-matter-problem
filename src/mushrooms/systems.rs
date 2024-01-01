@@ -2,14 +2,13 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    platforms::configs::FLOOR_THICKNESS, player::components::ControlledPlayer,
+    animations::components::{AnimationIndices, AnimationTimer},
+    platforms::configs::FLOOR_THICKNESS,
+    player::components::ControlledPlayer,
     setup::configs::WINDOW_BOTTOM_Y,
 };
 
-use super::{
-    components::{AnimationIndices, AnimationTimer, Mushroom},
-    configs::MUSHROOM_PATH,
-};
+use super::{components::Mushroom, configs::MUSHROOM_PATH};
 
 pub fn animate_sprite(
     time: Res<Time>,
@@ -50,7 +49,7 @@ pub fn setup_mushrooms(
                 texture_atlas: texture_atlas_handle,
                 sprite: TextureAtlasSprite::new(0),
                 transform: Transform {
-                    translation: Vec3::new(0., WINDOW_BOTTOM_Y + FLOOR_THICKNESS * 3., 0.),
+                    translation: Vec3::new(0., WINDOW_BOTTOM_Y + FLOOR_THICKNESS + 23., 0.),
                     scale: Vec3::new(5., 5., 1.),
                     ..default()
                 },

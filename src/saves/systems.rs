@@ -1,7 +1,9 @@
 use bevy::{prelude::*, tasks::IoTaskPool};
 use std::{fs::File, io::Write};
 
-use crate::{player::components::ControlledPlayer, wheel::components::Wheel};
+use crate::{
+    player::components::ControlledPlayer, setup::configs::AppStates, wheel::components::Wheel,
+};
 
 use super::{
     components::{PositionSaveComponent, WheelSaveComponent},
@@ -9,14 +11,17 @@ use super::{
     resources::{PositionSaveInformation, SaveGame, WheelSaveInformation},
 };
 
-pub fn load_scene_system(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // "Spawning" a scene bundle creates a new entity and spawns new instances
-    // of the given scene's entities as children of that entity.
+pub fn load_scene_system(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut app_state_next_state: ResMut<NextState<AppStates>>,
+) {
     commands.spawn(DynamicSceneBundle {
-        // Scenes are loaded just like any other asset.
         scene: asset_server.load(SAVES_PATH),
         ..default()
     });
+
+    app_state_next_state.set(AppStates::Game);
 }
 
 pub fn load_save(
@@ -31,7 +36,7 @@ pub fn load_save(
 
     if let Ok((entity, position)) = position_save_query.get_single() {
         player.translation.x = position.x;
-        player.translation.y = position.y;
+        player.translation.y = position.y + 1.;
         commands.entity(entity).despawn();
     }
 
@@ -41,37 +46,35 @@ pub fn load_save(
     }
 }
 
-pub fn check_for_save(mut save_game: ResMut<SaveGame>, input: Res<Input<KeyCode>>) {
+pub fn check_for_save(mut save_game: EventWriter<SaveGame>, input: Res<Input<KeyCode>>) {
     if input.pressed(KeyCode::P) {
-        save_game.save = true;
+        save_game.send_default();
     }
 }
 
-pub fn save_scene_system(world: &mut World) {
-    if world.resource::<SaveGame>().save {
-        if let Some(mut save_game) = world.get_resource_mut::<SaveGame>() {
-            save_game.save = false;
-        }
-
+pub fn save_scene_system(
+    app_registry: Res<AppTypeRegistry>,
+    mut save: EventReader<SaveGame>,
+    pos_save: Res<PositionSaveInformation>,
+    wheel_rot_save: Res<WheelSaveInformation>,
+) {
+    for _ in save.read() {
         let mut scene_world = World::new();
 
-        let type_registry = world.resource::<AppTypeRegistry>().clone();
+        let type_registry = app_registry.clone();
         scene_world.insert_resource(type_registry);
-        let pos_save = world.resource::<PositionSaveInformation>();
         scene_world.spawn(PositionSaveComponent {
             x: pos_save.x,
             y: pos_save.y,
         });
 
-        let wheel_rot_save = world.resource::<WheelSaveInformation>();
         scene_world.spawn(WheelSaveComponent {
             rot: wheel_rot_save.rot,
         });
 
         let scene = DynamicScene::from_world(&scene_world);
 
-        let type_registry_ref = scene_world.resource::<AppTypeRegistry>();
-        let serialized_scene = scene.serialize_ron(type_registry_ref).unwrap();
+        let serialized_scene = scene.serialize_ron(&app_registry).unwrap();
 
         // Writing the scene to a new file. Using a task to avoid calling the filesystem APIs in a system
         // as they are blocking
