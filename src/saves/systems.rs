@@ -36,7 +36,7 @@ pub fn load_save(
 
     if let Ok((entity, position)) = position_save_query.get_single() {
         player.translation.x = position.x;
-        player.translation.y = position.y + 1.;
+        player.translation.y = position.y;
         commands.entity(entity).despawn();
     }
 
