@@ -1,1 +1,1 @@
-pub const SERVER_ADDRESS: &str = "192.168.7.215";
+pub const SERVER_ADDRESS: &str = "10.0.0.148";
