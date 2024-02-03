@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_renet::renet::ClientId;
 
 #[derive(Component)]
-pub struct Jump(pub f32);
+pub struct Jump {
+    pub time: f32,
+    pub initial_velocity: f32,
+}
 
 #[derive(Component)]
 pub struct Player {
