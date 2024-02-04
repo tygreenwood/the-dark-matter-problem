@@ -11,9 +11,9 @@ use crate::{
 };
 
 use super::{
-    components::{Cat, ControlledPlayer, Jump, MyGamepad},
+    components::{Cat, ControlledPlayer, Dash, DashCooldown, Jump, MyGamepad},
     configs::{
-        PLAYER_ACCELERATION_FROM_GRAVITY, PLAYER_INITIAL_JUMP_VELOCITY,
+        PLAYER_ACCELERATION_FROM_GRAVITY, PLAYER_DASH_VELOCITY, PLAYER_INITIAL_JUMP_VELOCITY,
         PLAYER_RUNNING_ANIMATION_PATH, PLAYER_VELOCITY_X,
     },
 };
@@ -101,7 +101,13 @@ pub fn movement(
     axes: Res<Axis<GamepadAxis>>,
     my_gamepad: Option<Res<MyGamepad>>,
     time: Res<Time>,
-    mut query: Query<(&mut KinematicCharacterController, &GlobalTransform)>,
+    mut commands: Commands,
+    mut query: Query<(
+        Entity,
+        &mut KinematicCharacterController,
+        &GlobalTransform,
+        Option<&mut Dash>,
+    )>,
     mut query_player_flip: Query<&mut TextureAtlasSprite, (With<ControlledPlayer>, Without<Cat>)>,
     mut pos_save: ResMut<PositionSaveInformation>,
 ) {
@@ -113,7 +119,7 @@ pub fn movement(
         axes.get(axis_lx).unwrap_or(0.)
     });
 
-    let (mut player, player_pos) = query.single_mut();
+    let (entity, mut player, player_pos, dash_option) = query.single_mut();
 
     let mut movement = 0.0;
 
@@ -133,13 +139,88 @@ pub fn movement(
         }
     }
 
-    match player.translation {
-        Some(vec) => player.translation = Some(Vec2::new(movement, vec.y)), // update if it already exists
-        None => player.translation = Some(Vec2::new(movement, 0.0)),
+    if let Some(mut dash) = dash_option {
+        match player.translation {
+            Some(vec) => {
+                player.translation = Some(Vec2::new(dash.velocity * time.delta_seconds(), vec.y))
+            }
+            None => player.translation = Some(Vec2::new(dash.velocity * time.delta_seconds(), 0.0)),
+        }
+        dash.timer.tick(time.delta());
+        if dash.timer.just_finished() {
+            commands.entity(entity).remove::<Dash>();
+            commands
+                .entity(entity)
+                .insert(DashCooldown(Timer::from_seconds(1., TimerMode::Once)));
+        }
+    } else {
+        match player.translation {
+            Some(vec) => player.translation = Some(Vec2::new(movement, vec.y)), // update if it already exists
+            None => player.translation = Some(Vec2::new(movement, 0.0)),
+        }
     }
 
     pos_save.x = player_pos.translation().x;
     pos_save.y = player_pos.translation().y;
+}
+
+pub fn dash_cooldown(
+    mut commands: Commands,
+    mut query_dash_cooldown: Query<(Entity, &mut DashCooldown), Without<Dash>>,
+    time: Res<Time>,
+) {
+    if let Ok((entity, mut dash_cooldown)) = query_dash_cooldown.get_single_mut() {
+        dash_cooldown.0.tick(time.delta());
+        if dash_cooldown.0.just_finished() {
+            commands.entity(entity).remove::<DashCooldown>();
+        }
+    }
+}
+
+pub fn dash(
+    input: Res<Input<KeyCode>>,
+    buttons: Res<Input<GamepadButton>>,
+    axes: Res<Axis<GamepadAxis>>,
+    my_gamepad: Option<Res<MyGamepad>>,
+    mut commands: Commands,
+    query: Query<Entity, (Without<Dash>, Without<DashCooldown>, With<ControlledPlayer>)>,
+) {
+    if query.is_empty() {
+        return;
+    }
+
+    let (dash_controller, joystick_move) = my_gamepad.map_or((false, 0.0), |gp| {
+        let dash_button = GamepadButton {
+            gamepad: gp.0,
+            button_type: GamepadButtonType::East,
+        };
+        let axis_lx = GamepadAxis {
+            gamepad: gp.0,
+            axis_type: GamepadAxisType::LeftStickX,
+        };
+        (
+            buttons.pressed(dash_button),
+            axes.get(axis_lx).unwrap_or(0.),
+        )
+    });
+
+    if !input.pressed(KeyCode::Q) && !dash_controller {
+        return;
+    }
+
+    let entity = query.single();
+
+    let mut dash = 0.0;
+    if left(&input) || joystick_move < -0.2 {
+        dash = -1. * PLAYER_DASH_VELOCITY;
+    } else if right(&input) || joystick_move > 0.2 {
+        dash = PLAYER_DASH_VELOCITY;
+    }
+
+    commands.entity(entity).insert(Dash {
+        velocity: dash,
+        timer: Timer::from_seconds(0.25, TimerMode::Once),
+    });
 }
 
 pub fn jump(
@@ -196,13 +277,13 @@ pub fn remove_jump(
 
 pub fn vertical_velocity(
     time: Res<Time>,
-    mut query: Query<(&mut KinematicCharacterController, &mut Jump)>,
+    mut query: Query<(&mut KinematicCharacterController, &mut Jump, &mut Transform)>,
 ) {
     if query.is_empty() {
         return;
     }
 
-    let (mut player, mut jump) = query.single_mut();
+    let (mut player, mut jump, mut player_transform) = query.single_mut();
 
     let cur_time_dif = time.delta().as_secs_f32();
 
@@ -217,6 +298,11 @@ pub fn vertical_velocity(
     match player.translation {
         Some(vec) => player.translation = Some(Vec2::new(vec.x, movement)),
         None => player.translation = Some(Vec2::new(0.0, movement)),
+    }
+
+    if player_transform.translation.y < -800. {
+        player_transform.translation.x = 0.;
+        player_transform.translation.y = -100.;
     }
 }
 

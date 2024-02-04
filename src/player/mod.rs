@@ -22,6 +22,8 @@ impl Plugin for PlayerPlugin {
                         vertical_velocity,
                         animate_sprite,
                         remove_jump,
+                        dash,
+                        dash_cooldown,
                     )
                         .run_if(in_state(AppStates::Game)),
                     gamepad_connections,

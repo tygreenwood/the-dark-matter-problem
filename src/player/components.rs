@@ -18,5 +18,14 @@ pub struct ControlledPlayer;
 #[derive(Component)]
 pub struct Cat;
 
+#[derive(Component)]
+pub struct Dash {
+    pub velocity: f32,
+    pub timer: Timer,
+}
+
+#[derive(Component)]
+pub struct DashCooldown(pub Timer);
+
 #[derive(Resource)]
 pub struct MyGamepad(pub Gamepad);
